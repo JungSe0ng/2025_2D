@@ -1,50 +1,67 @@
-using NUnit.Framework;
-using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using System.Xml;
-using UnityEditor.Search;
+using UnityEngine;
 public class MonsterPool : MonoBehaviour
 {
     //최대 6마리
     public Dictionary<int, Queue<GameObject>> monsterDic = new Dictionary<int, Queue<GameObject>>();
-    
+
     //확인용 몬스터들
     [SerializeField]
-    public MonsterBase[] monsters = new MonsterBase[10];
+    public MonsterBase[] monsters = new MonsterBase[3];
+
+    //초반에 생성하는 몬스터 숫자
+    private int maxMonsterNum = 50;
+
+    //부족할 경우 추가 생성하는 몬스터 숫자
+    private int plusMonsterNum = 10;
 
     //여기서 미리 생성함 0보다 작으면 생성함 
     private void Start()
     {
-        //Test();
+        StartMonsterSetting(monsters);
     }
-    //que에 잘들어가는지 확인용
-    private void Test()
+
+    public void StartMonsterSetting(MonsterBase[] monsters)//start를 하면 몬스터들을 자동 생성하는 코드를 실행
     {
-        Debug.Log("start");
-        for (int i = 0; i < monsters.Length; i++)
+        GameObject obj = null;
+        foreach (MonsterBase monster in monsters)
         {
-            InputQue(monsters[i].monsterDB.MonsterCodeName, monsters[i].gameObject);
-            Debug.Log(monsterDic.Count);
+            if (monster == null) continue;
+            //각자 몬스터를 50마리씩 먼저 생성해서 비활성화
+            for (int i = 0; i < maxMonsterNum; i++)
+            {
+                obj = Instantiate(monster).gameObject;
+                InputQue(monster.monsterDB.MonsterCodeName, obj);
+            }
         }
         PrintQue();
     }
 
-
-    public void InputQue(int monsterNum, GameObject monster)//몬스터를 que에 넣기
+    public void InputQue(int monsterNum, GameObject monster)//몬스터를 que에 넣기 대신 넣을 때 비활성화를 시켜서 넣어야함
     {
-        
         //해당 키값이 있을 경우
-        if(monsterDic.TryGetValue(monsterNum, out Queue<GameObject> value))
+        if (monsterDic.TryGetValue(monsterNum, out Queue<GameObject> value))
         {
-            Debug.Log("해당 몬스터가 있어서 que에 삽입했습니다.");
+            //Debug.Log("해당 몬스터가 있어서 que에 삽입했습니다.");
             value.Enqueue(monster);
         }
 
         //해당 몬스터가 없을 경우 해당 que를 생성함
-        if (!monsterDic.ContainsKey(monsterNum)) { MonsterInput(monsterNum, monster);};
+        if (!monsterDic.ContainsKey(monsterNum)) { MonsterInput(monsterNum, monster); };
+
+        ObjectReset(monster);
     }
+
+    private void ObjectReset(GameObject obj)//물체 값들 전부 초기화 후 비활성화
+    {
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.identity;
+        obj.transform.parent = transform;
+        obj.name = obj.GetComponent<MonsterBase>().monsterDB.MonsterName;
+        obj.SetActive(false);
+    }
+
     //임시 que를 생성하고 해당 몬스터를 큐에 삽입
     private void MonsterInput(int monsterNum, GameObject monster)
     {
@@ -56,18 +73,30 @@ public class MonsterPool : MonoBehaviour
 
     public GameObject OutPutMonster(int monsterNum)//몬스터 반출
     {
-        //해당 몬스터가 dictionary에 존재하는지 확인
-        if (monsterDic.ContainsKey(monsterNum)) {
 
+        //해당 몬스터가 dictionary에 존재하는지 확인
+        if (monsterDic.ContainsKey(monsterNum))
+        {
+            GameObject obj = null;
             //해당 que에 존재하는지 확인하고 있으면 반출하고 없으면 에러메세지 후 생성함
             if (monsterDic[monsterNum].Count > 1)
             {
-                return monsterDic[monsterNum].Dequeue();
+                obj = monsterDic[monsterNum].Dequeue();
+                obj.SetActive(true);
+                return obj;
             }
             else
             {
-
-                return null; 
+                //몬스터를 추가로 10마리 생성 후 생성한 1마리를 반환
+                obj = monsterDic[monsterNum].Dequeue();
+                GameObject instanceObj = null;
+                for (int i = 0; i < plusMonsterNum; i++)
+                {
+                    instanceObj = Instantiate(obj);
+                    InputQue(monsterNum, instanceObj);
+                }
+                obj.SetActive(true);
+                return obj ;
             }
         };
 
