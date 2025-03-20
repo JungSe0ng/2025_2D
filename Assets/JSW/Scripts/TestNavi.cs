@@ -29,6 +29,7 @@ public class TestNavi : MonoBehaviour
 
     private void Start()
     {
+  
         PathFinding();
     }
     private void Awake()
@@ -40,7 +41,6 @@ public class TestNavi : MonoBehaviour
     //false인 곳만 이동해라 이건데 반대로 
     public void PathFinding()
     {
-        Debug.Log("start");
         // NodeArray의 크기 정해주고, isWalkAble, x, y 대입
         sizeX = topRight.x - bottomLeft.x + 1;
         sizeY = topRight.y - bottomLeft.y + 1;
@@ -49,16 +49,15 @@ public class TestNavi : MonoBehaviour
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
-            {
-                Debug.Log(new Vector2(i + bottomLeft.x, j + bottomLeft.y)+"입니다.");
+            {                
                 bool isWalkAble = false;
                 foreach (Collider2D col in Physics2D.OverlapCircleAll(new Vector2(i + bottomLeft.x, j + bottomLeft.y), 0.4f))
-                    if (col.gameObject.layer == LayerMask.NameToLayer("WalkAble")) { isWalkAble = true; Debug.Log($"{i} {j} isWalkAble)"); }
+                    if (col.gameObject.layer == LayerMask.NameToLayer("WalkAble")) { isWalkAble = true; Debug.Log($"{i} {j} walkable입니다."); };
 
                 NodeArray[i, j] = new Node(isWalkAble, i + bottomLeft.x, j + bottomLeft.y);
             }
         }
-
+        
 
         // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
         StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
@@ -112,28 +111,29 @@ public class TestNavi : MonoBehaviour
             OpenListAdd(CurNode.x + 1, CurNode.y);
             OpenListAdd(CurNode.x, CurNode.y - 1);
             OpenListAdd(CurNode.x - 1, CurNode.y);
+
         }
+        Debug.Log("fin");
     }
 
     void OpenListAdd(int checkX, int checkY)
     {
         // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
-        if (checkX >= bottomLeft.x && checkX < topRight.x + 1 && checkY >= bottomLeft.y && checkY < topRight.y + 1 && !NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y].isWalkAble && !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
+        bool istrue = (checkX >= bottomLeft.x && checkX < topRight.x + 1) ? true:false;
+
+        if (checkX >= bottomLeft.x &&
+            checkX < topRight.x + 1 &&
+            checkY >= bottomLeft.y &&
+            checkY < topRight.y + 1 && 
+            NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y].isWalkAble &&
+            !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
-            // 대각선 허용시, 벽 사이로 통과 안됨
-            // if (allowDiagonal) if (NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWalkAble && NodeArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWalkAble) return;
-
-            // 코너를 가로질러 가지 않을시, 이동 중에 수직수평 장애물이 있으면 안됨
-            //if (dontCrossCorner) if (NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWalkAble || NodeArray[checkX - bottomLeft.x, CurNode.y - bottomLeft.y].isWalkAble) return;
-
-            //해당 레이어가 워크가능하지 않는다면 종료
-            if (NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWalkAble == false) return;
 
             // 이웃노드에 넣고, 직선은 10, 대각선은 14비용
             Node NeighborNode = NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y];
             int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.y - checkY == 0 ? 10 : 14);
 
-
+            Debug.Log($"{checkX} {checkY} {NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWalkAble}");
             // 이동비용이 이웃노드G보다 작거나 또는 열린리스트에 이웃노드가 없다면 G, H, ParentNode를 설정 후 열린리스트에 추가
             if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
             {

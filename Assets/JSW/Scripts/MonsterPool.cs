@@ -35,7 +35,7 @@ public class MonsterPool : MonoBehaviour
                 InputQue(monster.monsterDB.MonsterCodeName, obj);
             }
         }
-        PrintQue();
+        //PrintQue();
     }
 
     public void InputQue(int monsterNum, GameObject monster)//몬스터를 que에 넣기 대신 넣을 때 비활성화를 시켜서 넣어야함
