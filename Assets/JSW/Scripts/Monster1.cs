@@ -11,6 +11,6 @@ public class Monster1 : MonsterBase
     public override void Move()
     {
         base.Move();
-        Debug.Log("움직이는중");
+        //Debug.Log("움직이는중");
     }
 }

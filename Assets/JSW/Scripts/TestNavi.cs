@@ -29,7 +29,6 @@ public class TestNavi : MonoBehaviour
 
     private void Start()
     {
-  
         PathFinding();
     }
     private void Awake()
@@ -37,7 +36,6 @@ public class TestNavi : MonoBehaviour
         
     }
     //astar알고리즘은 layer가 walkable이여야 해당 방향으로 이동할 수 있다.
-
     //false인 곳만 이동해라 이건데 반대로 
     public void PathFinding()
     {
@@ -52,7 +50,7 @@ public class TestNavi : MonoBehaviour
             {                
                 bool isWalkAble = false;
                 foreach (Collider2D col in Physics2D.OverlapCircleAll(new Vector2(i + bottomLeft.x, j + bottomLeft.y), 0.4f))
-                    if (col.gameObject.layer == LayerMask.NameToLayer("WalkAble")) { isWalkAble = true; Debug.Log($"{i} {j} walkable입니다."); };
+                    if (col.gameObject.layer == LayerMask.NameToLayer("WalkAble")) { isWalkAble = true; };
 
                 NodeArray[i, j] = new Node(isWalkAble, i + bottomLeft.x, j + bottomLeft.y);
             }
@@ -92,7 +90,7 @@ public class TestNavi : MonoBehaviour
                 FinalNodeList.Add(StartNode);
                 FinalNodeList.Reverse();
 
-                for (int i = 0; i < FinalNodeList.Count; i++) print(i + "번째는 " + FinalNodeList[i].x + ", " + FinalNodeList[i].y);
+                //for (int i = 0; i < FinalNodeList.Count; i++) print(i + "번째는 " + FinalNodeList[i].x + ", " + FinalNodeList[i].y);
                 return;
             }
 
@@ -113,7 +111,6 @@ public class TestNavi : MonoBehaviour
             OpenListAdd(CurNode.x - 1, CurNode.y);
 
         }
-        Debug.Log("fin");
     }
 
     void OpenListAdd(int checkX, int checkY)
@@ -133,7 +130,6 @@ public class TestNavi : MonoBehaviour
             Node NeighborNode = NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y];
             int MoveCost = CurNode.G + (CurNode.x - checkX == 0 || CurNode.y - checkY == 0 ? 10 : 14);
 
-            Debug.Log($"{checkX} {checkY} {NodeArray[CurNode.x - bottomLeft.x, checkY - bottomLeft.y].isWalkAble}");
             // 이동비용이 이웃노드G보다 작거나 또는 열린리스트에 이웃노드가 없다면 G, H, ParentNode를 설정 후 열린리스트에 추가
             if (MoveCost < NeighborNode.G || !OpenList.Contains(NeighborNode))
             {
