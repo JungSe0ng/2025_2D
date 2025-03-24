@@ -12,7 +12,7 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
 
     private Rigidbody2D rb2d = null;
 
-    private float moveSpeed = 20f;
+    private float moveSpeed = 1.5f;
     private int moveNodeListNum = 1;
 
     public WalkState(MonsterBase monster)
@@ -49,25 +49,22 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
         //최종 목적지가 선정이 된 경우
         if (testNavi.FinalNodeList.Count <= 0) return;
         //이렇게 되었을 때 그만두어라
-        if (moveNodeListNum == testNavi.FinalNodeList.Count-1) return;
- 
+        if (moveNodeListNum == testNavi.FinalNodeList.Count - 1) return;
+
         //targetList선택하기
         targetList.x = testNavi.FinalNodeList[moveNodeListNum].x;
         targetList.y = testNavi.FinalNodeList[moveNodeListNum].y;
 
 
         //이동할 방향을 선택
-        moveVir.x = testNavi.FinalNodeList[moveNodeListNum].x- testNavi.FinalNodeList[moveNodeListNum-1].x;
-        moveVir.y = testNavi.FinalNodeList[moveNodeListNum].y- testNavi.FinalNodeList[moveNodeListNum-1].y;
-        
+        moveVir.x = testNavi.FinalNodeList[moveNodeListNum].x - testNavi.FinalNodeList[moveNodeListNum - 1].x;
+        moveVir.y = testNavi.FinalNodeList[moveNodeListNum].y - testNavi.FinalNodeList[moveNodeListNum - 1].y;
+
         //
-
+        monster.rb2d.linearVelocity = moveVir*moveSpeed;
         //Debug.Log(moveNodeListNum+" "+moveVir.x + ", " + moveVir.y);
-        monster.rb2d.MovePosition(monster.rb2d.position+moveVir*moveSpeed*Time.deltaTime);
-        //  monster.transform.position = Vector2.MoveTowards(monster.transform.position, moveVir, moveSpeed * Time.deltaTime);
-
         //만약 같은 위치라면 최종 리스트 숫자를 업데이트한다.
-        if (Vector2.Distance((Vector2)monster.transform.position, targetList) < 0.3f)
+        if (Vector2.Distance((Vector2)monster.transform.position, targetList) < 0.1f)
         {
             Debug.Log("목표물에 도착했습니다.");
             monster.transform.position = targetList;
@@ -75,7 +72,8 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
         }
         else
         {
-            Debug.Log($"{(Vector2)monster.transform.position}  {targetList}   {Vector2.Distance((Vector2)monster.transform.position, targetList)}");
+            Debug.Log($"{(Vector2)monster.transform.position}  {targetList}   {Vector2.Distance((Vector2)monster.transform.position, targetList)} /  {moveNodeListNum}");
+            Debug.Log(moveNodeListNum);
         }
     }
 }
