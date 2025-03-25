@@ -1,14 +1,10 @@
+using System;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
 public class MonsterPool : Singleton<MonsterPool>
 {
     //최대 6마리
     public Dictionary<int, Queue<GameObject>> monsterDic = new Dictionary<int, Queue<GameObject>>();
-
-    //확인용 몬스터들
-    [SerializeField]
-    public MonsterBase[] monsters = new MonsterBase[3];
 
     //초반에 생성하는 몬스터 숫자
     private int maxMonsterNum = 50;
@@ -19,7 +15,8 @@ public class MonsterPool : Singleton<MonsterPool>
     //여기서 미리 생성함 0보다 작으면 생성함 
     private void Start()
     {
-        StartMonsterSetting(monsters);
+        //    StartMonsterSetting(monsters);
+        FactoryManager.Instance.FactoryMonsterBasicInstance();
     }
 
     public void StartMonsterSetting(MonsterBase[] monsters)//start를 하면 몬스터들을 자동 생성하는 코드를 실행
@@ -65,6 +62,7 @@ public class MonsterPool : Singleton<MonsterPool>
     //임시 que를 생성하고 해당 몬스터를 큐에 삽입
     public void MonsterInput(int monsterNum, GameObject monster)
     {
+ 
         Debug.Log("해당 큐를 생성하고 몬스터를 넣었습니다.");
         Queue<GameObject> que = new Queue<GameObject>();
         que.Enqueue(monster);
@@ -96,7 +94,7 @@ public class MonsterPool : Singleton<MonsterPool>
                     InputQue(monsterNum, instanceObj);
                 }
                 obj.SetActive(true);
-                return obj ;
+                return obj;
             }
         };
 

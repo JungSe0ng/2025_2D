@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class MonsterBase : MonoBehaviour
+public class MonsterBase : MonoBehaviour, IProduct
 {
+    //몬스터 애니메이터
+    public Animator animator = null;
+
     //몬스터 공격범위 설정
     [SerializeField]
     private CircleCollider2D attackArea = null;
@@ -14,31 +17,12 @@ public class MonsterBase : MonoBehaviour
     [SerializeField]
     private List<GameObject> isAttackMonster = new List<GameObject>();
 
-    [SerializeField]
-    private int moveNodeListNum = 1;
-
-    [SerializeField]
-    private float moveSpeed = 1f;
-
-    public Animator animator = null;
-
-    //astar알고리즘
-    private TestNavi testNavi = null;
-
-    //움직일 방향
-    private Vector2 moveVir = Vector2.zero;
-
-    //목표물 위치값
-    private Vector2 targetList = Vector2.zero;
-
-    private bool isResetPath = false;
-
     public Rigidbody2D rb2d = null;
 
     //상태들을 미리 생성해서 저장해놓고 필요할 때 상태를 꺼내오는 방식으로 사용
     private Dictionary<MonsterState, IState<MonsterBase>> dicState = new Dictionary<MonsterState, IState<MonsterBase>>();
 
-
+    //몬스터 상태 표시
     private StateMachine<MonsterBase> machine = null;
 
     //몬스터 생명
@@ -56,6 +40,8 @@ public class MonsterBase : MonoBehaviour
         }
     }
 
+    public string codeName { get; set; }
+
     private void Awake()
     {
         MonsterAwakeSetting();
@@ -70,32 +56,28 @@ public class MonsterBase : MonoBehaviour
         {
             machine.DoOperateUpdate();
         }
-        ConcerFactory con1 = new ConcerFactory();
+       
     }
 
     private void MonsterAwakeSetting()//몬스터 초기세팅
     {
         //몬스터 공격 범위 설정
-        attackArea.radius = monsterDB.IsAttackArea;
-        testNavi = GetComponent<TestNavi>();
+        attackArea.radius = monsterDB.IsAttackArea;;
         rb2d = GetComponent<Rigidbody2D>();
-
 
         //상태를 생성 후 Dictionary로 관리
         IState<MonsterBase> idle = new IdleState(this);
         IState<MonsterBase> walk = new WalkState(this);
         IState<MonsterBase> dead = new DeadState(this);
 
-
         dicState.Add(MonsterState.Idle, idle);
         dicState.Add(MonsterState.Walk, walk);
         dicState.Add(MonsterState.Dead, dead);
 
-
         machine = new StateMachine<MonsterBase>(this, dicState[MonsterState.Idle]);
         machine.SetState(dicState[MonsterState.Walk]);
     }
-
+    
 
     private IEnumerator CorutineMonsterPattern()//몬스터 패턴 정의
     {
@@ -179,6 +161,11 @@ public class MonsterBase : MonoBehaviour
     {
 
 
+    }
+
+    public void Initialize()
+    {
+        //몬스터가 소환되었을 경우
     }
 
     public enum Direction

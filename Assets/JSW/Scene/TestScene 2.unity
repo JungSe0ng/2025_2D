@@ -205,6 +205,10 @@ MonoBehaviour:
   attackArea: {fileID: 1570965250}
   monsterDB: {fileID: 11400000, guid: 8cf90365c1e85d1489faeabbe6e59bad, type: 2}
   isAttackMonster: []
+  moveNodeListNum: 1
+  moveSpeed: 1
+  animator: {fileID: 0}
+  rb2d: {fileID: 0}
 --- !u!95 &224460195
 Animator:
   serializedVersion: 7
@@ -324,6 +328,62 @@ Transform:
   m_Children:
   - {fileID: 1243440162}
   - {fileID: 1570965251}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &268497119
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 268497121}
+  - component: {fileID: 268497120}
+  m_Layer: 0
+  m_Name: Factory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &268497120
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268497119}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3d6138ff879b2e4c8ac32a0cecaa33d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsters:
+  - {fileID: 1467283916}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  monsterInstanceNum: 50
+--- !u!4 &268497121
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 268497119}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -5.1417217, y: -2.2373395, z: -0.812806}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
@@ -1707,6 +1767,10 @@ MonoBehaviour:
   attackArea: {fileID: 1479907194}
   monsterDB: {fileID: 11400000, guid: 8cf90365c1e85d1489faeabbe6e59bad, type: 2}
   isAttackMonster: []
+  moveNodeListNum: 1
+  moveSpeed: 1
+  animator: {fileID: 0}
+  rb2d: {fileID: 0}
 --- !u!114 &1467283917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1871,7 +1935,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1735887701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1960,3 +2024,4 @@ SceneRoots:
   - {fileID: 191655035}
   - {fileID: 1988013689}
   - {fileID: 952546396}
+  - {fileID: 268497121}
