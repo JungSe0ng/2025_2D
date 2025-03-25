@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
-public class MonsterPool : MonoBehaviour
+public class MonsterPool : Singleton<MonsterPool>
 {
     //최대 6마리
     public Dictionary<int, Queue<GameObject>> monsterDic = new Dictionary<int, Queue<GameObject>>();
@@ -63,7 +63,7 @@ public class MonsterPool : MonoBehaviour
     }
 
     //임시 que를 생성하고 해당 몬스터를 큐에 삽입
-    private void MonsterInput(int monsterNum, GameObject monster)
+    public void MonsterInput(int monsterNum, GameObject monster)
     {
         Debug.Log("해당 큐를 생성하고 몬스터를 넣었습니다.");
         Queue<GameObject> que = new Queue<GameObject>();

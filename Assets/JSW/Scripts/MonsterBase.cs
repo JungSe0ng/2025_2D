@@ -70,6 +70,7 @@ public class MonsterBase : MonoBehaviour
         {
             machine.DoOperateUpdate();
         }
+        ConcerFactory con1 = new ConcerFactory();
     }
 
     private void MonsterAwakeSetting()//몬스터 초기세팅
