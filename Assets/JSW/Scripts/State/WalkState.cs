@@ -4,7 +4,7 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
 {
     private MonsterBase monster = null;
     private TestNavi testNavi = null;
-    private Rigidbody2D rb2d = null;
+    // private Rigidbody2D rb2d = null;
 
     //움직일 방향
     private Vector2 moveVir = Vector2.zero;
@@ -55,32 +55,29 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
         targetList.x = testNavi.FinalNodeList[moveNodeListNum].x;
         targetList.y = testNavi.FinalNodeList[moveNodeListNum].y;
 
-
+        Vector2 currentNode = new Vector2(testNavi.FinalNodeList[moveNodeListNum - 1].x, testNavi.FinalNodeList[moveNodeListNum - 1].y);
+        
         //이동할 방향을 선택
         moveVir.x = testNavi.FinalNodeList[moveNodeListNum].x - testNavi.FinalNodeList[moveNodeListNum - 1].x;
         moveVir.y = testNavi.FinalNodeList[moveNodeListNum].y - testNavi.FinalNodeList[moveNodeListNum - 1].y;
         //올라갈때는 수치값을 더 주고 내려갈때는 수치값을 줄인다.
+
         if (moveVir.y >= 1)
         {
-            Debug.Log("올라가는중"); adjustNum =0.7f;
-        }
-        else if (moveVir.y < 0) { adjustNum = 0.3f; Debug.Log("감속중"); } else { adjustNum = 0.3f; }
+            // Debug.Log("올라가는중");
+            adjustNum = 1f;
 
-        monster.rb2d.linearVelocity = moveVir*monster.monsterDB.MoveSpeed*adjustNum;
+        }
+        else if (moveVir.y < 0) { adjustNum = 0.3f; Debug.Log("감속중"); } else { adjustNum = 1f; }
 
         //만약 같은 위치라면 최종 리스트 숫자를 업데이트한다.
-        if(Mathf.Abs(monster.transform.position.x-targetList.x)<0.1f)
-        //if (Vector2.Distance((Vector2)monster.transform.position, targetList) < 1f)
+        if (Mathf.Abs(monster.transform.position.x - targetList.x) < 0.1f)
         {
             Debug.Log("목표물에 도착했습니다.");
             //monster.transform.position = targetList;
             moveNodeListNum++;
+            if (moveNodeListNum == testNavi.FinalNodeList.Count-1) { adjustNum = 0; }
         }
-        else
-        {
-            
-            Debug.Log($"{(Vector2)monster.transform.position}  {targetList}   {Vector2.Distance((Vector2)monster.transform.position, targetList)} /  {moveNodeListNum}   {monster.rb2d.linearVelocity.x}  {monster.rb2d.linearVelocity.y}  {adjustNum}");
-            //Debug.Log(moveNodeListNum);
+        monster.rb2d.linearVelocity = moveVir * monster.monsterDB.MoveSpeed * adjustNum;
         }
     }
-}
