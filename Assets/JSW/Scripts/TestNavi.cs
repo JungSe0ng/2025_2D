@@ -1,19 +1,20 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class Node
 {
-    public Node(bool isWalk, int _x, int _y) { isWalkAble = isWalk; x = _x; y = _y; }
+    public Node(int x, int y, NodeType nodeType = NodeType.NotWalk) { this.nodeType = nodeType; this.x = x; this.y = y; }
 
-    public bool isWalkAble;
     public Node ParentNode;
-
+    public NodeType nodeType = NodeType.NotWalk;
     // G : 시작으로부터 이동했던 거리, H : |가로|+|세로| 장애물 무시하여 목표까지의 거리, F : G + H
     public int x, y, G, H;
     public int F { get { return G + H; } }
 }
 
+public enum NodeType { NotWalk = 0, WalkAble = 1, Jump = 2 };
 
 public class TestNavi : MonoBehaviour
 {
@@ -29,11 +30,12 @@ public class TestNavi : MonoBehaviour
 
     private void Start()
     {
-        PathFinding();
+        // PathFinding();
+        startPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
     }
     private void Awake()
     {
-        
+
     }
     //astar알고리즘은 layer가 walkable이여야 해당 방향으로 이동할 수 있다.
     //false인 곳만 이동해라 이건데 반대로 
@@ -44,18 +46,28 @@ public class TestNavi : MonoBehaviour
         sizeY = topRight.y - bottomLeft.y + 1;
         NodeArray = new Node[sizeX, sizeY];
 
+                Debug.Log(Enum.GetName(typeof(NodeType), 2));
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
-            {                
-                bool isWalkAble = false;
+            {
+                NodeArray[i, j] = new Node(i + bottomLeft.x, j + bottomLeft.y);
                 foreach (Collider2D col in Physics2D.OverlapCircleAll(new Vector2(i + bottomLeft.x, j + bottomLeft.y), 0.4f))
-                    if (col.gameObject.layer == LayerMask.NameToLayer("WalkAble")) { isWalkAble = true; };
-
-                NodeArray[i, j] = new Node(isWalkAble, i + bottomLeft.x, j + bottomLeft.y);
+                {
+                    if (i == 5 && j == 0) Debug.Log(LayerMask.LayerToName(col.gameObject.layer));
+                    for (int k = 0; k < Enum.GetValues(typeof(NodeType)).Length; k++)
+                    {
+                        if (LayerMask.LayerToName(col.gameObject.layer) == Enum.GetName(typeof(NodeType), k))
+                        {
+                            NodeArray[i, j].nodeType = (NodeType)k;
+                            break;
+                        }
+                    }
+                }
             }
         }
-        
+      PrintNodeType();
+
 
         // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
         StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
@@ -116,13 +128,13 @@ public class TestNavi : MonoBehaviour
     void OpenListAdd(int checkX, int checkY)
     {
         // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
-        bool istrue = (checkX >= bottomLeft.x && checkX < topRight.x + 1) ? true:false;
+        bool istrue = (checkX >= bottomLeft.x && checkX < topRight.x + 1) ? true : false;
 
         if (checkX >= bottomLeft.x &&
             checkX < topRight.x + 1 &&
             checkY >= bottomLeft.y &&
-            checkY < topRight.y + 1 && 
-            NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y].isWalkAble &&
+            checkY < topRight.y + 1 &&
+            NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y].nodeType != NodeType.NotWalk &&
             !ClosedList.Contains(NodeArray[checkX - bottomLeft.x, checkY - bottomLeft.y]))
         {
 
@@ -146,5 +158,21 @@ public class TestNavi : MonoBehaviour
     {
         if (FinalNodeList.Count != 0) for (int i = 0; i < FinalNodeList.Count - 1; i++)
                 Gizmos.DrawLine(new Vector2(FinalNodeList[i].x, FinalNodeList[i].y), new Vector2(FinalNodeList[i + 1].x, FinalNodeList[i + 1].y));
+    }
+
+    private void PrintNodeType()
+    {
+        for (int i = 0; i < sizeX; i++)
+        {
+            for (int j = 0; j < sizeY; j++)
+            {
+                Debug.Log($"x : {i}    y: {j}     {NodeArray[i, j].nodeType.ToString()}");
+
+            }
+        }
+    }
+    public bool IsEnumDefined<T>(int value) where T : Enum
+    {
+        return Enum.IsDefined(typeof(T), value);
     }
 }

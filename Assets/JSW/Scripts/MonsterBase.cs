@@ -45,6 +45,7 @@ public class MonsterBase : MonoBehaviour, IProduct
     private void Awake()
     {
         MonsterAwakeSetting();
+        Time.timeScale = 1f;
     }
     private void Start()
     {
