@@ -66,7 +66,7 @@ public class TestNavi : MonoBehaviour
                 }
             }
         }
-      PrintNodeType();
+      //PrintNodeType();
 
 
         // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화

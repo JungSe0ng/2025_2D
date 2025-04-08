@@ -4,7 +4,6 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
 {
     private MonsterBase monster = null;
     private TestNavi testNavi = null;
-    // private Rigidbody2D rb2d = null;
 
     //움직일 방향
     private Vector2 moveVir = Vector2.zero;
@@ -24,17 +23,14 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
     //walk애니메이션 종료 시 애니메이션 false하기
     public void OperateEnter(MonsterBase sender)
     {
-        Debug.Log("워크 시작");
-        testNavi = monster.gameObject.GetComponent<TestNavi>();
+        testNavi = monster.testNavi;
         moveNodeListNum = 1;
         testNavi.PathFinding();
         monster.animator.SetFloat("IsIdle", 1);
-
     }
 
     public void OperateExit(MonsterBase sender)
     {
-        Debug.Log("워크 종료");
         monster.animator.SetFloat("IsIdle", 0);
     }
 
@@ -57,13 +53,8 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
 
         Vector2 currentNode = new Vector2(testNavi.FinalNodeList[moveNodeListNum - 1].x, testNavi.FinalNodeList[moveNodeListNum - 1].y);
 
-        //이동할 방향을 선택
-
         moveVir.x = testNavi.FinalNodeList[moveNodeListNum].x - testNavi.FinalNodeList[moveNodeListNum - 1].x;
         moveVir.y = testNavi.FinalNodeList[moveNodeListNum].y - testNavi.FinalNodeList[moveNodeListNum - 1].y;
-        //올라갈때는 수치값을 더 주고 내려갈때는 수치값을 줄인다.
-        //점프할때 중력값을 1 올라갈때 1 그냥 or 내려갈 때 추가 수치 부여
-
         DecreaseSpeed();
         //만약 같은 위치라면 최종 리스트 숫자를 업데이트한다.
         if (Mathf.Abs(monster.transform.position.x - targetList.x) < 0.2f)
@@ -76,14 +67,14 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
 
         Jump();
         monster.rb2d.linearVelocity = moveVir * monster.monsterDB.MoveSpeed * adjustNum;
-        Debug.Log($"{moveVir}");
         PlayerRotation();
     }
+
     private void Jump()
     {
         if (testNavi.FinalNodeList[moveNodeListNum].nodeType == NodeType.Jump && testNavi.FinalNodeList[(moveNodeListNum == 1) ? 0 : moveNodeListNum - 1].nodeType == NodeType.Jump)
         {
-            monster.rb2d.AddForce(new Vector2(0, 0.5f) * 10); Debug.Log("점프했습니다."); monster.rb2d.gravityScale = 2;
+            monster.rb2d.AddForce(new Vector2(0, 0.5f) * 10);  monster.rb2d.gravityScale = 2;
         }
         else
         {
@@ -131,7 +122,6 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
         else if (go >= 1) { monster.transform.rotation = Quaternion.Euler(0, 0, 45); }
         else if (go < 0) { monster.transform.rotation = Quaternion.Euler(0, 0, -45); }
         else { monster.transform.rotation = Quaternion.Euler(0, 0, 0); }
-        // Debug.Log(go + " "+back);
     }
 
 }

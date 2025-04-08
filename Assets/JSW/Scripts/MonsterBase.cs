@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class MonsterBase : MonoBehaviour, IProduct
+public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 {
     //몬스터 애니메이터
     public Animator animator = null;
@@ -19,12 +19,7 @@ public class MonsterBase : MonoBehaviour, IProduct
 
     public Rigidbody2D rb2d = null;
 
-    //상태들을 미리 생성해서 저장해놓고 필요할 때 상태를 꺼내오는 방식으로 사용
-    private Dictionary<MonsterState, IState<MonsterBase>> dicState = new Dictionary<MonsterState, IState<MonsterBase>>();
-
-    //몬스터 상태 표시
-    private StateMachine<MonsterBase> machine = null;
-
+    public TestNavi testNavi = null;
     //몬스터 생명
     private float hp = 100.0f;
     public float Hp
@@ -49,26 +44,28 @@ public class MonsterBase : MonoBehaviour, IProduct
     }
     private void Start()
     {
-        StartCoroutine(CorutineMonsterPattern());
+        StartCoroutine(CorutinePattern());
     }
+
     private void Update()
     {
-        if (machine != null)
-        {
-            machine.DoOperateUpdate();
-        }
-       
+        UpdateSetting();
     }
 
     private void MonsterAwakeSetting()//몬스터 초기세팅
     {
         //몬스터 공격 범위 설정
-        attackArea.radius = monsterDB.IsAttackArea;;
+        attackArea.radius = monsterDB.IsAttackArea; ;
         rb2d = GetComponent<Rigidbody2D>();
+        IStateStartSetting();
+    }
 
+    protected override void IStateStartSetting()
+    {
         //상태를 생성 후 Dictionary로 관리
         IState<MonsterBase> idle = new IdleState(this);
         IState<MonsterBase> walk = new WalkState(this);
+        IState<MonsterBase> attack = new AttackState(this);
         IState<MonsterBase> dead = new DeadState(this);
 
         dicState.Add(MonsterState.Idle, idle);
@@ -78,9 +75,8 @@ public class MonsterBase : MonoBehaviour, IProduct
         machine = new StateMachine<MonsterBase>(this, dicState[MonsterState.Idle]);
         machine.SetState(dicState[MonsterState.Walk]);
     }
-    
 
-    private IEnumerator CorutineMonsterPattern()//몬스터 패턴 정의
+    protected override IEnumerator CorutinePattern()
     {
         while (dicState[MonsterState.Dead] != machine.CurState)
         {
@@ -97,7 +93,15 @@ public class MonsterBase : MonoBehaviour, IProduct
             yield return new WaitForFixedUpdate();
         }
     }
-    private void StatePatttern(MonsterState state)
+
+    protected override void UpdateSetting()
+    {
+        if (machine != null)
+        {
+            machine.DoOperateUpdate();
+        }
+    }
+    public override void StatePatttern(MonsterState state)
     {
         switch (state)
         {

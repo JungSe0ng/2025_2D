@@ -4,9 +4,15 @@ public class AttackState : MonoBehaviour, IState<MonsterBase>
 {
     private MonsterBase monster = null;
 
+    public AttackState(MonsterBase monster)
+    {
+        this.monster = monster;
+    }
+
     public void OperateEnter(MonsterBase sender)
     {
-
+        Debug.Log("공격모드에 진입");
+        monster.Attack();
     }
 
     public void OperateExit(MonsterBase sender)
