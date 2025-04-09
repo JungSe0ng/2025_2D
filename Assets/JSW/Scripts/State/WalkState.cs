@@ -23,10 +23,11 @@ public class WalkState : MonoBehaviour, IState<MonsterBase>
     //walk애니메이션 종료 시 애니메이션 false하기
     public void OperateEnter(MonsterBase sender)
     {
-        testNavi = monster.testNavi;
-        moveNodeListNum = 1;
-        testNavi.PathFinding();
-        monster.animator.SetFloat("IsIdle", 1);
+        Debug.Log("이것은 아닙니다.");
+        //testNavi = monster.testNavi;
+        //moveNodeListNum = 1;
+        //testNavi.PathFinding();
+        //monster.animator.SetFloat("IsIdle", 1);
     }
 
     public void OperateExit(MonsterBase sender)

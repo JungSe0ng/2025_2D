@@ -1,10 +1,13 @@
+using BasicMonsterState;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Rendering;
 using UnityEngine;
 public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 {
     //몬스터 애니메이터
     public Animator animator = null;
+    public TestNavi navi = null;
 
     //몬스터 공격범위 설정
     [SerializeField]
@@ -19,12 +22,11 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 
     public Rigidbody2D rb2d = null;
 
-    public TestNavi testNavi = null;
+
     //몬스터 생명
     private float hp = 100.0f;
     public float Hp
     {
-
         private get { return hp; }
 
         set
@@ -39,8 +41,8 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 
     private void Awake()
     {
+        navi = GetComponent<TestNavi>();
         MonsterAwakeSetting();
-        Time.timeScale = 1f;
     }
     private void Start()
     {
@@ -57,23 +59,28 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         //몬스터 공격 범위 설정
         attackArea.radius = monsterDB.IsAttackArea; ;
         rb2d = GetComponent<Rigidbody2D>();
+        navi = GetComponent<TestNavi>();
         IStateStartSetting();
+        Debug.Log(1);
     }
 
+    //해당 자식에서 OVERRIDE로 진행하자
     protected override void IStateStartSetting()
     {
+        /*
         //상태를 생성 후 Dictionary로 관리
         IState<MonsterBase> idle = new IdleState(this);
         IState<MonsterBase> walk = new WalkState(this);
         IState<MonsterBase> attack = new AttackState(this);
         IState<MonsterBase> dead = new DeadState(this);
-
+ 
         dicState.Add(MonsterState.Idle, idle);
         dicState.Add(MonsterState.Walk, walk);
         dicState.Add(MonsterState.Dead, dead);
 
         machine = new StateMachine<MonsterBase>(this, dicState[MonsterState.Idle]);
         machine.SetState(dicState[MonsterState.Walk]);
+        */
     }
 
     protected override IEnumerator CorutinePattern()
@@ -111,13 +118,11 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 
             case MonsterState.Walk:
                 //공격 후 다시 walk로 변경 부분을 추가하기
-                Move();
                 machine.SetState(dicState[MonsterState.Walk]);
                 break;
 
             case MonsterState.Attack:
                 machine.SetState(dicState[MonsterState.Attack]);
-                Attack();
                 break;
 
             case MonsterState.Dead:
@@ -135,9 +140,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     //공격범위내에 온 몬스터를 감지해서 해당 몬스터를 List에 넣음
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("몬스터를 감지했습니다.");
         AddListIsAttackMonster(collision.gameObject);
-        Debug.Log(collision.gameObject.layer);
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
@@ -155,17 +158,6 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         {
             if (isAttackMonster.Contains(collision.gameObject)) isAttackMonster.Remove(collision.gameObject);
         }
-    }
-
-
-    public virtual void Attack()
-    {
-
-    }
-    public virtual void Move()
-    {
-
-
     }
 
     public void Initialize()

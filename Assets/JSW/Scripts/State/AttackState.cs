@@ -12,7 +12,6 @@ public class AttackState : MonoBehaviour, IState<MonsterBase>
     public void OperateEnter(MonsterBase sender)
     {
         Debug.Log("공격모드에 진입");
-        monster.Attack();
     }
 
     public void OperateExit(MonsterBase sender)
