@@ -8,6 +8,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     //몬스터 애니메이터
     public Animator animator = null;
     public TestNavi navi = null;
+    public Rigidbody2D rb2d = null;
 
     //몬스터 공격범위 설정
     [SerializeField]
@@ -20,7 +21,6 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     [SerializeField]
     private List<GameObject> isAttackMonster = new List<GameObject>();
 
-    public Rigidbody2D rb2d = null;
 
 
     //몬스터 생명
@@ -61,28 +61,11 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         rb2d = GetComponent<Rigidbody2D>();
         navi = GetComponent<TestNavi>();
         IStateStartSetting();
-        Debug.Log(1);
     }
 
     //해당 자식에서 OVERRIDE로 진행하자
-    protected override void IStateStartSetting()
-    {
-        /*
-        //상태를 생성 후 Dictionary로 관리
-        IState<MonsterBase> idle = new IdleState(this);
-        IState<MonsterBase> walk = new WalkState(this);
-        IState<MonsterBase> attack = new AttackState(this);
-        IState<MonsterBase> dead = new DeadState(this);
- 
-        dicState.Add(MonsterState.Idle, idle);
-        dicState.Add(MonsterState.Walk, walk);
-        dicState.Add(MonsterState.Dead, dead);
-
-        machine = new StateMachine<MonsterBase>(this, dicState[MonsterState.Idle]);
-        machine.SetState(dicState[MonsterState.Walk]);
-        */
-    }
-
+    protected override void IStateStartSetting() { }
+   
     protected override IEnumerator CorutinePattern()
     {
         while (dicState[MonsterState.Dead] != machine.CurState)
@@ -110,26 +93,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     }
     public override void StatePatttern(MonsterState state)
     {
-        switch (state)
-        {
-            case MonsterState.Idle:
-                machine.SetState(dicState[MonsterState.Idle]);
-                break;
-
-            case MonsterState.Walk:
-                //공격 후 다시 walk로 변경 부분을 추가하기
-                machine.SetState(dicState[MonsterState.Walk]);
-                break;
-
-            case MonsterState.Attack:
-                machine.SetState(dicState[MonsterState.Attack]);
-                break;
-
-            case MonsterState.Dead:
-                machine.SetState(dicState[MonsterState.Dead]);
-                break;
-
-        }
+        machine.SetState(dicState[state]);
     }
 
 
