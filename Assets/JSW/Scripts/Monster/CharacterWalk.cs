@@ -15,6 +15,8 @@ public class CharacterWalk : MonoBehaviour
     protected int moveNodeListNum = 1;
 
     protected float adjustNum = 1f;
+    protected Animator animator = null;
+    protected Rigidbody2D rb2d = null;
 
     protected void MoveTarget() //타겟으로 이동
     {
@@ -45,7 +47,7 @@ public class CharacterWalk : MonoBehaviour
         Jump();
 
         //이것도 공용 Walk에서 사용하자
-        monsterBase.rb2d.linearVelocity = moveVir * monsterBase.monsterDB.MoveSpeed * adjustNum;
+        rb2d.linearVelocity = moveVir * monsterBase.MonsterDB.MoveSpeed * adjustNum;
         PlayerRotation();
     }
 
@@ -53,11 +55,11 @@ public class CharacterWalk : MonoBehaviour
     {
         if (testNavi.FinalNodeList[moveNodeListNum].nodeType == NodeType.Jump && testNavi.FinalNodeList[(moveNodeListNum == 1) ? 0 : moveNodeListNum - 1].nodeType == NodeType.Jump)
         {
-            monsterBase.rb2d.AddForce(new Vector2(0, 0.5f) * 10); monsterBase.rb2d.gravityScale = 2;
+            rb2d.AddForce(new Vector2(0, 0.5f) * 10); rb2d.gravityScale = 2;
         }
         else
         {
-            monsterBase.rb2d.gravityScale = 3f;
+            rb2d.gravityScale = 3f;
         }
     }
     private void DecreaseSpeed() //내려갈 때 감속
@@ -101,5 +103,6 @@ public class CharacterWalk : MonoBehaviour
         else if (go >= 1) { monsterBase.transform.rotation = Quaternion.Euler(0, 0, 45); }
         else if (go < 0) { monsterBase.transform.rotation = Quaternion.Euler(0, 0, -45); }
         else { monsterBase.transform.rotation = Quaternion.Euler(0, 0, 0); }
+        Debug.LogWarning(moveNodeListNum+"  " +go + "  " + back);
     }
 }

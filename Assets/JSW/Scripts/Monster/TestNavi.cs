@@ -45,8 +45,6 @@ public class TestNavi : MonoBehaviour
         sizeX = topRight.x - bottomLeft.x + 1;
         sizeY = topRight.y - bottomLeft.y + 1;
         NodeArray = new Node[sizeX, sizeY];
-
-                Debug.Log(Enum.GetName(typeof(NodeType), 2));
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)

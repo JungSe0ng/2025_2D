@@ -14,6 +14,7 @@ public class Monster1 : MonsterBase
 
         dicState.Add(MonsterState.Idle, idle);
         dicState.Add(MonsterState.Walk, walk);
+        dicState.Add(MonsterState.Attack, attack);
         dicState.Add(MonsterState.Dead, dead);
 
         machine = new StateMachine<MonsterBase>(this, dicState[MonsterState.Idle]);

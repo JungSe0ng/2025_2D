@@ -20,26 +20,10 @@ public class FactoryManager : Singleton<FactoryManager>
             {
                 
                 monster = Instantiate(monsters[i].gameObject).GetComponent<MonsterBase>();
-                MonsterPool.Instance.InputQue(monster.monsterDB.MonsterCodeName, monster.gameObject);
+                MonsterPool.Instance.InputQue(monster.MonsterDB.MonsterCodeName, monster.gameObject);
             }
         }
     }
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //codeName부르면 해당 몬스터가 소환되도록 만들가?
 }
 
 

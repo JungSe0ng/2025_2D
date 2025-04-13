@@ -28,20 +28,26 @@ namespace BasicMonsterState
     public class BasicMonsterAttack : MonoBehaviour, IState<MonsterBase>
     {
         private MonsterBase monsterBase = null;
+        private Animator animator = null;
+        private Rigidbody2D rb2d = null;
         public BasicMonsterAttack(MonsterBase monsterBase)
         {
             this.monsterBase = monsterBase;
+            animator = monsterBase.gameObject.transform.GetChild(0).GetComponent<Animator>();
+            rb2d = monsterBase.GetComponent<Rigidbody2D>();
         }
         public void OperateEnter(MonsterBase sender)
         {
             Debug.Log("공격상태에 진입했습니다.");
-            monsterBase.animator.SetBool("IsAttack", true);
+            animator.SetBool("IsAttack", true);
+            rb2d.freezeRotation = true;
         }
 
         public void OperateExit(MonsterBase sender)
         {
             Debug.Log("공격 상태에 종료했습니다.");
-            monsterBase.animator.SetBool("IsAttack", false);
+            animator.SetBool("IsAttack", false);
+            rb2d.freezeRotation = false;
         }
 
         public void OperateUpdate(MonsterBase sender)
@@ -76,24 +82,26 @@ namespace BasicMonsterState
 
     public class BasicMonsterWalk : CharacterWalk, IState<MonsterBase>
     {
+
         public BasicMonsterWalk(MonsterBase monsterBase)
         {
             this.monsterBase = monsterBase;
             testNavi = monsterBase.GetComponent<TestNavi>();
+            animator = monsterBase.gameObject.transform.GetChild(0).GetComponent<Animator>();
+            rb2d = monsterBase.GetComponent<Rigidbody2D>();
         }
 
         public void OperateEnter(MonsterBase sender)
         {
             Debug.Log("걷기 상태에 진입했습니다.");
-            moveNodeListNum = 1;
             testNavi.PathFinding();
-            monsterBase.animator.SetFloat("IsIdle", 1); 
+            animator.SetFloat("IsIdle", 1); 
         }
 
         public void OperateExit(MonsterBase sender)
         {
             Debug.Log("걷기 상태에 종료 했습니다.");
-            monsterBase.animator.SetFloat("IsIdle", 0);
+            animator.SetFloat("IsIdle", 0);
         }
 
         public void OperateUpdate(MonsterBase sender)

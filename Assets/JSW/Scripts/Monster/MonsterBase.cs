@@ -5,18 +5,14 @@ using UnityEditor.Rendering;
 using UnityEngine;
 public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 {
-    //몬스터 애니메이터
-    public Animator animator = null;
-    public TestNavi navi = null;
-    public Rigidbody2D rb2d = null;
-
     //몬스터 공격범위 설정
     [SerializeField]
     private CircleCollider2D attackArea = null;
 
     //몬스터 스크립터블 오브젝트 정보
     [SerializeField]
-    public MonsterScriptableObjects monsterDB = null;
+    private MonsterScriptableObjects monsterDB = null;
+    public MonsterScriptableObjects MonsterDB { get { return monsterDB; } }
 
     [SerializeField]
     private List<GameObject> isAttackMonster = new List<GameObject>();
@@ -41,7 +37,6 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 
     private void Awake()
     {
-        navi = GetComponent<TestNavi>();
         MonsterAwakeSetting();
     }
     private void Start()
@@ -58,8 +53,6 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     {
         //몬스터 공격 범위 설정
         attackArea.radius = monsterDB.IsAttackArea; ;
-        rb2d = GetComponent<Rigidbody2D>();
-        navi = GetComponent<TestNavi>();
         IStateStartSetting();
     }
 
@@ -91,6 +84,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
             machine.DoOperateUpdate();
         }
     }
+
     public override void StatePatttern(MonsterState state)
     {
         machine.SetState(dicState[state]);
@@ -120,6 +114,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     {
         if (collision.layer == (int)LayerNum.Enemy)
         {
+            Debug.Log("LIST에서 제외됨");
             if (isAttackMonster.Contains(collision.gameObject)) isAttackMonster.Remove(collision.gameObject);
         }
     }

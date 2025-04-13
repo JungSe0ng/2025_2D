@@ -29,7 +29,7 @@ public class MonsterPool : Singleton<MonsterPool>
             for (int i = 0; i < maxMonsterNum; i++)
             {
                 obj = Instantiate(monster).gameObject;
-                InputQue(monster.monsterDB.MonsterCodeName, obj);
+                InputQue(monster.MonsterDB.MonsterCodeName, obj);
             }
         }
         //PrintQue();
@@ -55,7 +55,7 @@ public class MonsterPool : Singleton<MonsterPool>
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localRotation = Quaternion.identity;
         obj.transform.parent = transform;
-        obj.name = obj.GetComponent<MonsterBase>().monsterDB.MonsterName;
+        obj.name = obj.GetComponent<MonsterBase>().MonsterDB.MonsterName;
         obj.SetActive(false);
     }
 
