@@ -1358,7 +1358,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &476140692
 Transform:
   m_ObjectHideFlags: 0
@@ -1383,20 +1383,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 476140691}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3d6138ff879b2e4c8ac32a0cecaa33d, type: 3}
+  m_Script: {fileID: 11500000, guid: 550348ee58d47ec4bb00a0989b382e6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsters:
+  prefabs:
   - {fileID: 5534682290071609488, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  prefabsCount: 1
   monsterInstanceNum: 50
 --- !u!1 &592522420
 GameObject:
@@ -1535,7 +1527,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3758879139237849062, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5354657825519937394, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5352,7 +5344,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3758879139237849062, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5354657825519937394, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5851,7 +5843,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3758879139237849062, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5354657825519937394, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5987,7 +5979,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1624442214
 Transform:
   m_ObjectHideFlags: 0
@@ -6121,7 +6113,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3758879139237849062, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5354657825519937394, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6471,7 +6463,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3758879139237849062, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5354657825519937394, guid: 73872e3356d63f34395384a9cc82d466, type: 3}
       propertyPath: m_LocalPosition.x

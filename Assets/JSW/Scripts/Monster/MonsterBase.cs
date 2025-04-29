@@ -33,7 +33,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         }
     }
 
-    public string codeName { get; set; }
+    public int codeName { get; set; }
 
     private void Awake()
     {
@@ -46,7 +46,7 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
 
     private void Update()
     {
-        UpdateSetting();
+      //  UpdateSetting();
     }
 
     private void MonsterAwakeSetting()//몬스터 초기세팅

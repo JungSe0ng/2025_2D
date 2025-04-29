@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class StateMachine<T>
 {
-    private T m_sender;
+    private T tData;
 
     //현재 상태를 담는 프로퍼티
     public IState<T> CurState { get; set; }
@@ -10,16 +10,16 @@ public class StateMachine<T>
     //기본 상태를 생성시에 설정하게 생성자 선언
     public StateMachine(T sender, IState<T> state)
     {
-        m_sender = sender;
+        tData = sender;
         SetState(state);
     }
 
     public void SetState(IState<T> state)
     {
         // null에러출력
-        if (m_sender == null)
+        if (tData == null)
         {
-            Debug.LogError("m_sender ERROR");
+            Debug.LogError("tData ERROR");
             return;
         }
 
@@ -30,14 +30,14 @@ public class StateMachine<T>
         }
 
         if (CurState != null)
-            CurState.OperateExit(m_sender);
+            CurState.OperateExit(tData);
 
         //상태 교체.
         CurState = state;
 
         //새 상태의 Enter를 호출한다.
         if (CurState != null)
-            CurState.OperateEnter(m_sender);
+            CurState.OperateEnter(tData);
 
         Debug.Log("SetNextState : " + state.GetType());
 
@@ -46,12 +46,13 @@ public class StateMachine<T>
     //State용 Update 함수.
     public void DoOperateUpdate()
     {
-        if (m_sender == null)
+        if (tData == null)
         {
             Debug.LogError("invalid m_sener");
             return;
         }
-        CurState.OperateUpdate(m_sender);
+        CurState.OperateUpdate(tData);
     }
 }
+
 public enum MonsterState { Idle = 0, Walk = 1, Attack = 2, Dead = 3 } //기본 상태, 걷기, 공격, 죽음

@@ -33,18 +33,69 @@ public class TestNavi : MonoBehaviour
         // PathFinding();
         startPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
     }
-    private void Awake()
-    {
 
-    }
-    //astar알고리즘은 layer가 walkable이여야 해당 방향으로 이동할 수 있다.
-    //false인 곳만 이동해라 이건데 반대로 
     public void PathFinding()
     {
         // NodeArray의 크기 정해주고, isWalkAble, x, y 대입
         sizeX = topRight.x - bottomLeft.x + 1;
         sizeY = topRight.y - bottomLeft.y + 1;
         NodeArray = new Node[sizeX, sizeY];
+
+        //블록 설정
+        NodeTypeSetting();
+
+        // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
+        StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
+        TargetNode = NodeArray[targetPos.x - bottomLeft.x, targetPos.y - bottomLeft.y];
+
+        //Node 생성
+        InstanceNode();
+    }
+
+    private void InstanceNode()
+    {
+        OpenList = new List<Node>() { StartNode };
+        ClosedList = new List<Node>();
+        FinalNodeList = new List<Node>();
+        while (OpenList.Count > 0)
+        {
+            // 열린리스트 중 가장 F가 작고 F가 같다면 H가 작은 걸 현재노드로 하고 열린리스트에서 닫힌리스트로 옮기기
+            CurNode = OpenList[0];
+            for (int i = 1; i < OpenList.Count; i++)
+                if (OpenList[i].F <= CurNode.F && OpenList[i].H < CurNode.H) CurNode = OpenList[i];
+
+            OpenList.Remove(CurNode);
+            ClosedList.Add(CurNode);
+            // 마지막
+            if (CurNode == TargetNode)
+            {
+                Node TargetCurNode = TargetNode;
+                while (TargetCurNode != StartNode)
+                {
+                    FinalNodeList.Add(TargetCurNode);
+                    TargetCurNode = TargetCurNode.ParentNode;
+                }
+                FinalNodeList.Add(StartNode);
+                FinalNodeList.Reverse();
+                return;
+            }
+            // ↗↖↙↘
+            if (allowDiagonal)
+            {
+                OpenListAdd(CurNode.x + 1, CurNode.y + 1);
+                OpenListAdd(CurNode.x - 1, CurNode.y + 1);
+                OpenListAdd(CurNode.x - 1, CurNode.y - 1);
+                OpenListAdd(CurNode.x + 1, CurNode.y - 1);
+            }
+            // ↑ → ↓ ←
+            OpenListAdd(CurNode.x, CurNode.y + 1);
+            OpenListAdd(CurNode.x + 1, CurNode.y);
+            OpenListAdd(CurNode.x, CurNode.y - 1);
+            OpenListAdd(CurNode.x - 1, CurNode.y);
+        }
+    }
+    private void NodeTypeSetting()
+    {
         for (int i = 0; i < sizeX; i++)
         {
             for (int j = 0; j < sizeY; j++)
@@ -64,66 +115,8 @@ public class TestNavi : MonoBehaviour
                 }
             }
         }
-      //PrintNodeType();
-
-
-        // 시작과 끝 노드, 열린리스트와 닫힌리스트, 마지막리스트 초기화
-        StartNode = NodeArray[startPos.x - bottomLeft.x, startPos.y - bottomLeft.y];
-        TargetNode = NodeArray[targetPos.x - bottomLeft.x, targetPos.y - bottomLeft.y];
-
-        //Node 생성
-        OpenList = new List<Node>() { StartNode };
-        ClosedList = new List<Node>();
-        FinalNodeList = new List<Node>();
-
-
-        while (OpenList.Count > 0)
-        {
-            // 열린리스트 중 가장 F가 작고 F가 같다면 H가 작은 걸 현재노드로 하고 열린리스트에서 닫힌리스트로 옮기기
-            CurNode = OpenList[0];
-            for (int i = 1; i < OpenList.Count; i++)
-                if (OpenList[i].F <= CurNode.F && OpenList[i].H < CurNode.H) CurNode = OpenList[i];
-
-            OpenList.Remove(CurNode);
-            ClosedList.Add(CurNode);
-
-
-            // 마지막
-            if (CurNode == TargetNode)
-            {
-                Node TargetCurNode = TargetNode;
-                while (TargetCurNode != StartNode)
-                {
-                    FinalNodeList.Add(TargetCurNode);
-                    TargetCurNode = TargetCurNode.ParentNode;
-                }
-                FinalNodeList.Add(StartNode);
-                FinalNodeList.Reverse();
-
-                //for (int i = 0; i < FinalNodeList.Count; i++) print(i + "번째는 " + FinalNodeList[i].x + ", " + FinalNodeList[i].y);
-                return;
-            }
-
-
-            // ↗↖↙↘
-            if (allowDiagonal)
-            {
-                OpenListAdd(CurNode.x + 1, CurNode.y + 1);
-                OpenListAdd(CurNode.x - 1, CurNode.y + 1);
-                OpenListAdd(CurNode.x - 1, CurNode.y - 1);
-                OpenListAdd(CurNode.x + 1, CurNode.y - 1);
-            }
-
-            // ↑ → ↓ ←
-            OpenListAdd(CurNode.x, CurNode.y + 1);
-            OpenListAdd(CurNode.x + 1, CurNode.y);
-            OpenListAdd(CurNode.x, CurNode.y - 1);
-            OpenListAdd(CurNode.x - 1, CurNode.y);
-
-        }
     }
-
-    void OpenListAdd(int checkX, int checkY)
+    private void OpenListAdd(int checkX, int checkY)
     {
         // 상하좌우 범위를 벗어나지 않고, 벽이 아니면서, 닫힌리스트에 없다면
         bool istrue = (checkX >= bottomLeft.x && checkX < topRight.x + 1) ? true : false;
@@ -168,9 +161,5 @@ public class TestNavi : MonoBehaviour
 
             }
         }
-    }
-    public bool IsEnumDefined<T>(int value) where T : Enum
-    {
-        return Enum.IsDefined(typeof(T), value);
     }
 }
