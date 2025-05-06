@@ -1,6 +1,6 @@
 using BasicMonsterState;
 using UnityEngine;
-
+using MonsterEnum;
 public class Monster1 : MonsterBase
 {
     protected override void IStateStartSetting()
@@ -12,12 +12,12 @@ public class Monster1 : MonsterBase
         IState<MonsterBase> attack = new BasicMonsterAttack(this);
         IState<MonsterBase> dead = new BasicMonsterDead(this);
 
-        dicState.Add(MonsterState.Idle, idle);
-        dicState.Add(MonsterState.Walk, walk);
-        dicState.Add(MonsterState.Attack, attack);
-        dicState.Add(MonsterState.Dead, dead);
+        dicState.Add(EMonsterState.Idle, idle);
+        dicState.Add(EMonsterState.Walk, walk);
+        dicState.Add(EMonsterState.Attack, attack);
+        dicState.Add(EMonsterState.Dead, dead);
 
-        machine = new StateMachine<MonsterBase>(this, dicState[MonsterState.Idle]);
-        machine.SetState(dicState[MonsterState.Walk]);
+        machine = new StateMachine<MonsterBase>(this, dicState[EMonsterState.Idle]);
+        machine.SetState(dicState[EMonsterState.Walk]);
     }
 }

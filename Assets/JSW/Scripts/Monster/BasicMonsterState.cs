@@ -12,12 +12,12 @@ namespace BasicMonsterState
 
         public void OperateEnter(MonsterBase sender)
         {
-            Debug.Log("Idle»óÅÂ¿¡ ÁøÀÔÇß½À´Ï´Ù.");
+            Debug.Log("Idleìƒíƒœë¡œ ì „í™˜ë˜ì—ˆìŠµë‹ˆë‹¤.");
         }
 
         public void OperateExit(MonsterBase sender)
         {
-            Debug.Log("Idle»óÅÂ¿¡ Á¾·áÇÕ´Ï´Ù.");
+            Debug.Log("Idleìƒíƒœë¡œ ì „í™˜í•©ë‹ˆë‹¤.");
         }
 
         public void OperateUpdate(MonsterBase sender)
@@ -38,14 +38,14 @@ namespace BasicMonsterState
         }
         public void OperateEnter(MonsterBase sender)
         {
-            Debug.Log("°ø°İ»óÅÂ¿¡ ÁøÀÔÇß½À´Ï´Ù.");
+            Debug.Log("ëŒ€ê¸°ìƒíƒœë¡œ ì „í™˜ë˜ì—ˆìŠµë‹ˆë‹¤.");
             animator.SetBool("IsAttack", true);
             rb2d.freezeRotation = true;
         }
 
         public void OperateExit(MonsterBase sender)
         {
-            Debug.Log("°ø°İ »óÅÂ¿¡ Á¾·áÇß½À´Ï´Ù.");
+            Debug.Log("ê³µê²© ìƒíƒœë¡œ ì „í™˜ë˜ì—ˆìŠµë‹ˆë‹¤.");
             animator.SetBool("IsAttack", false);
             rb2d.freezeRotation = false;
         }
@@ -93,14 +93,14 @@ namespace BasicMonsterState
 
         public void OperateEnter(MonsterBase sender)
         {
-            Debug.Log("°È±â »óÅÂ¿¡ ÁøÀÔÇß½À´Ï´Ù.");
+            Debug.Log("ê±·ê¸° ìƒíƒœë¡œ ì „í™˜ë˜ì—ˆìŠµë‹ˆë‹¤.");
             testNavi.PathFinding();
             animator.SetFloat("IsIdle", 1); 
         }
 
         public void OperateExit(MonsterBase sender)
         {
-            Debug.Log("°È±â »óÅÂ¿¡ Á¾·á Çß½À´Ï´Ù.");
+            Debug.Log("ê±·ê¸° ìƒíƒœë¡œ ì „í™˜ í•©ë‹ˆë‹¤.");
             animator.SetFloat("IsIdle", 0);
         }
 

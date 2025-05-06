@@ -6,10 +6,10 @@ public class CharacterWalk : MonoBehaviour
     
     protected TestNavi testNavi = null;
 
-    //¿òÁ÷ÀÏ ¹æÇâ
+    //ìºë¦­í„° ì´ë™
     protected Vector2 moveVir = Vector2.zero;
 
-    //¸ñÇ¥¹° À§Ä¡°ª
+    //ëª©í‘œì˜ ìœ„ì¹˜ë¡œ
     protected Vector2 targetList = Vector2.zero;
 
     protected int moveNodeListNum = 1;
@@ -18,35 +18,35 @@ public class CharacterWalk : MonoBehaviour
     protected Animator animator = null;
     protected Rigidbody2D rb2d = null;
 
-    protected void MoveTarget() //Å¸°ÙÀ¸·Î ÀÌµ¿
+    protected void MoveTarget() //íƒ€ê²Ÿìœ¼ë¡œ ì´ë™
     {
-        //ÇöÀç À§Ä¡¿Í ¸ñÇ¥À§Ä¡¸¦ ¹Ş¾Æ¼­ ÇØ´ç ¹æÇâÀ¸·Î ÀÌµ¿ÇÏ°í ÇØ´ç À§Ä¡·Î ÀÌµ¿ÀÌ ³¡³µÀ¸¸é ´ÙÀ½ ¸ñÇ¥¸¦ ¾÷µ¥ÀÌÆ® ÇÑ´Ù. ÃÖÁ¾ ¸®½ºÆ®¿¡ ´êÀ» ¶§±îÁö ¹İº¹ÇÑ´Ù.
-        //ÃÖÁ¾ ¸ñÀûÁö°¡ ¼±Á¤ÀÌ µÈ °æ¿ì
+        //í˜„ì¬ ìœ„ì¹˜ì™€ ëª©í‘œìœ„ì¹˜ë¥¼ ë°›ì•„ì„œ í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ ì´ë™í•˜ê³  í•´ë‹¹ ìœ„ì¹˜ë¡œ ì´ë™ì´ ëë‚˜ë©´ ë‹¤ìŒ ëª©í‘œë¥¼ ì„¤ì •í•œë‹¤. ì´ ê³¼ì •ì„ ê³„ì† ë°˜ë³µí•œë‹¤.
+        //í˜„ì¬ ë…¸ë“œê°€ ì—†ìœ¼ë©´ ë¦¬í„´
         if (testNavi.FinalNodeList.Count <= 0) return;
-        //ÀÌ·¸°Ô µÇ¾úÀ» ¶§ ±×¸¸µÎ¾î¶ó
+        //ì´ë¯¸ ëë‚¬ìœ¼ë©´ ë¦¬í„´
         if (moveNodeListNum == testNavi.FinalNodeList.Count - 1) return;
 
-        //targetList¼±ÅÃÇÏ±â
+        //targetListì„¤ì •í•˜ê¸°
         targetList.x = testNavi.FinalNodeList[moveNodeListNum].x;
         targetList.y = testNavi.FinalNodeList[moveNodeListNum].y;
-
+        
         Vector2 currentNode = new Vector2(testNavi.FinalNodeList[moveNodeListNum - 1].x, testNavi.FinalNodeList[moveNodeListNum - 1].y);
 
         moveVir.x = testNavi.FinalNodeList[moveNodeListNum].x - testNavi.FinalNodeList[moveNodeListNum - 1].x;
         moveVir.y = testNavi.FinalNodeList[moveNodeListNum].y - testNavi.FinalNodeList[moveNodeListNum - 1].y;
         DecreaseSpeed();
-        //¸¸¾à °°Àº À§Ä¡¶ó¸é ÃÖÁ¾ ¸®½ºÆ® ¼ıÀÚ¸¦ ¾÷µ¥ÀÌÆ®ÇÑ´Ù.
+        //í˜„ì¬ ìœ„ì¹˜ê°€ ëª©í‘œ ìœ„ì¹˜ë©´ ë‹¤ìŒ ë…¸ë“œ ë²ˆí˜¸ë¥¼ ì¦ê°€ì‹œí‚¨ë‹¤.
         if (Mathf.Abs(monsterBase.transform.position.x - targetList.x) < 0.2f)
         {
             moveNodeListNum++;
 
-            //µµÂøÁöÁ¡¿¡ µµÂøÇÏ¸é ¿òÁ÷ÀÓÀ» ¸ØÃã
+            //ë§ˆì§€ë§‰ì´ë©´ ì†ë„ë¥¼ ì¤„ì„
             if (moveNodeListNum == testNavi.FinalNodeList.Count - 1) { adjustNum = 0; }
         }
 
         Jump();
 
-        //ÀÌ°Íµµ °ø¿ë Walk¿¡¼­ »ç¿ëÇÏÀÚ
+        //í˜„ì¬ ìœ„ì¹˜ê°€ ëª©í‘œ ìœ„ì¹˜ë©´ ë‹¤ìŒ ë…¸ë“œ ë²ˆí˜¸ë¥¼ ì¦ê°€ì‹œí‚¨ë‹¤.
         rb2d.linearVelocity = moveVir * monsterBase.MonsterDB.MoveSpeed * adjustNum;
         PlayerRotation();
     }
@@ -62,19 +62,19 @@ public class CharacterWalk : MonoBehaviour
             rb2d.gravityScale = 3f;
         }
     }
-    private void DecreaseSpeed() //³»·Á°¥ ¶§ °¨¼Ó
+    private void DecreaseSpeed() //ì†ë„ë¥¼ ì¡°ì ˆ
     {
         if (moveVir.y < 0) adjustNum = 0.5f;
         else if (moveVir.y >= 1) adjustNum = 1.1f;
         else adjustNum = 1f;
     }
-    //ÃßÈÄ ¼öÁ¤
-    private void PlayerRotation() // ÇÃ·¹ÀÌ¾î È¸Àü°ª º¸Á¤
+    //ìºë¦­í„° íšŒì „
+    private void PlayerRotation() // í”Œë ˆì´ì–´ íšŒì „ ì„¤ì •
     {
-        //¾ÕÀ¸·Î °¥ ¹æÇâ
+        //ìœ„ë¡œ ê°€ëŠ”ì§€ í™•ì¸
         int go = testNavi.FinalNodeList[moveNodeListNum].y - testNavi.FinalNodeList[moveNodeListNum - 1].y;
 
-        //ÀÌÀü¿¡ °¬¾ú´ø ¹æÇâ
+        //ì´ì „ì— ê°€ë˜ ë°©í–¥ í™•ì¸
         int back = 0;
         if (moveNodeListNum <= 1) { back = 0; }
         else
@@ -82,12 +82,10 @@ public class CharacterWalk : MonoBehaviour
             back = testNavi.FinalNodeList[moveNodeListNum - 1].y - testNavi.FinalNodeList[moveNodeListNum - 2].y;
         }
 
-        //ÀÌÀü³ëµå¿¡¼­ º¯°æµÈ ¹æÇâ°ªÀÌ »ó½ÂÀÌ°í ´ÙÀ½³ëµå¿¡¼­´Â »ó½ÂÀÏ °æ¿ì °¢µµ¸¦ Áß°£°ªÀ¸·Î º¯°æÇÑ´Ù.
-        //¾ÕÀ¸·Î °¥ °æ¿ì Ç×»ó 0À» °íÁ¤ 
-        //À§·Î °¥°æ¿ì ÇÃ·¹ÀÌ¾î´Â 45µµ±îÁö È¸ÀüÀÌ °¡´ÉÇÏ´Ù.
-
-        //ÀÌÀü³ëµå ¹æÇâÀÌ 0ÀÌ¸é¼­ ´ÙÀ½ ³ëµå°¡ 1ÀÏ °æ¿ì ÇØ´ç °¢µµ´Â 25µµ·Î º¯°æÇÑ´Ù.
-        //ÀÌÀü³ëµå ¹æÇâÀÌ 1ÀÌ¸é¼­ ´ÙÀ½ ³ëµå°¡ 0ÀÏ °æ¿ì ÇØ´ç °¢µµ´Â 25µµ·Î º¯°æÇÑ´Ù.
+        //ì´ì „ ë°©í–¥ì´ 0ì´ë©´ì„œ í˜„ì¬ ë°©í–¥ì´ 1ì´ë©´ í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ 25ë„ë¥¼ íšŒì „í•œë‹¤.
+        //ì´ì „ ë°©í–¥ì´ 1ì´ë©´ì„œ í˜„ì¬ ë°©í–¥ì´ 0ì´ë©´ í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ 45ë„ë¥¼ íšŒì „í•œë‹¤.
+        //ì´ì „ ë°©í–¥ì´ 0ì´ë©´ì„œ í˜„ì¬ ë°©í–¥ì´ -1ì´ë©´ í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ -15ë„ë¥¼ íšŒì „í•œë‹¤.
+        //ì´ì „ ë°©í–¥ì´ -1ì´ë©´ì„œ í˜„ì¬ ë°©í–¥ì´ 0ì´ë©´ í•´ë‹¹ ë°©í–¥ìœ¼ë¡œ -15ë„ë¥¼ íšŒì „í•œë‹¤.
         if ((back == 0 && go == 1))
         {
             monsterBase.transform.rotation = Quaternion.Euler(0, 0, 25);

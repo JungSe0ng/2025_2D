@@ -4,10 +4,10 @@ public class StateMachine<T>
 {
     private T m_sender;
 
-    //ÇöÀç »óÅÂ¸¦ ´ã´Â ÇÁ·ÎÆÛÆ¼
+    //ìƒíƒœ ê´€ë¦¬ë¥¼ ìœ„í•œ í´ë˜ìŠ¤
     public IState<T> CurState { get; set; }
 
-    //±âº» »óÅÂ¸¦ »ı¼º½Ã¿¡ ¼³Á¤ÇÏ°Ô »ı¼ºÀÚ ¼±¾ğ
+    //ê¸°ë³¸ ìƒíƒœë¥¼ ì„¤ì •í•˜ê³  ìƒíƒœë¥¼ ê´€ë¦¬
     public StateMachine(T sender, IState<T> state)
     {
         m_sender = sender;
@@ -16,7 +16,7 @@ public class StateMachine<T>
 
     public void SetState(IState<T> state)
     {
-        // null¿¡·¯Ãâ·Â
+        // nullì²´í¬
         if (m_sender == null)
         {
             Debug.LogError("m_sender ERROR");
@@ -32,10 +32,10 @@ public class StateMachine<T>
         if (CurState != null)
             CurState.OperateExit(m_sender);
 
-        //»óÅÂ ±³Ã¼.
+        //ìƒíƒœ ê°ì²´.
         CurState = state;
 
-        //»õ »óÅÂÀÇ Enter¸¦ È£ÃâÇÑ´Ù.
+        //ì´ ìƒíƒœì˜ Enterë¥¼ í˜¸ì¶œí•œë‹¤.
         if (CurState != null)
             CurState.OperateEnter(m_sender);
 
@@ -43,7 +43,7 @@ public class StateMachine<T>
 
     }
 
-    //State¿ë Update ÇÔ¼ö.
+    //Stateì˜ Update í•¨ìˆ˜.
     public void DoOperateUpdate()
     {
         if (m_sender == null)
@@ -54,4 +54,3 @@ public class StateMachine<T>
         CurState.OperateUpdate(m_sender);
     }
 }
-public enum MonsterState { Idle = 0, Walk = 1, Attack = 2, Dead = 3 } //±âº» »óÅÂ, °È±â, °ø°İ, Á×À½

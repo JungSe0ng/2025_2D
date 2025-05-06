@@ -1,15 +1,15 @@
-using BasicMonsterState;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Rendering;
 using UnityEngine;
-public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
+using MonsterEnum;
+public class MonsterBase : StatePattern<EMonsterState, MonsterBase>, IProduct
 {
-    //¸ó½ºÅÍ °ø°İ¹üÀ§ ¼³Á¤
+    // ëª¬ìŠ¤í„° ê³µê²©ë²”ìœ„ ì½œë¼ì´ë”
     [SerializeField]
     private CircleCollider2D attackArea = null;
 
-    //¸ó½ºÅÍ ½ºÅ©¸³ÅÍºí ¿ÀºêÁ§Æ® Á¤º¸
+    // ëª¬ìŠ¤í„° ìŠ¤í¬ë¦½í„°ë¸” ì˜¤ë¸Œì íŠ¸ ë°ì´í„°
     [SerializeField]
     private MonsterScriptableObjects monsterDB = null;
     public MonsterScriptableObjects MonsterDB { get { return monsterDB; } }
@@ -17,19 +17,17 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
     [SerializeField]
     private List<GameObject> isAttackMonster = new List<GameObject>();
 
-
-
-    //¸ó½ºÅÍ »ı¸í
+    // ëª¬ìŠ¤í„° HP
     private float hp = 100.0f;
     public float Hp
     {
         private get { return hp; }
-
         set
         {
             hp = value;
-            //Ã¼·ÂÀÌ 0¹Ì¸¸À¸·Î ³»·Á°¡¸é Á×Àº »óÅÂ·Î º¯°æ
-            if (hp < 0.0f) StatePatttern(MonsterState.Dead);
+            // ì²´ë ¥ì´ 0 ì´í•˜ë¼ë©´ ìƒíƒœë¥¼ Deadë¡œ ì „í™˜
+            
+            if (hp < 0.0f) StatePatttern(EMonsterState.Dead);
         }
     }
 
@@ -49,28 +47,29 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         UpdateSetting();
     }
 
-    private void MonsterAwakeSetting()//¸ó½ºÅÍ ÃÊ±â¼¼ÆÃ
+    private void MonsterAwakeSetting()// ëª¬ìŠ¤í„° ì´ˆê¸°ì„¤ì •
     {
-        //¸ó½ºÅÍ °ø°İ ¹üÀ§ ¼³Á¤
-        attackArea.radius = monsterDB.IsAttackArea; ;
+        // ê³µê²© ë²”ìœ„ ë°˜ì˜
+        attackArea.radius = monsterDB.IsAttackArea;
         IStateStartSetting();
     }
 
-    //ÇØ´ç ÀÚ½Ä¿¡¼­ OVERRIDE·Î ÁøÇàÇÏÀÚ
+    // í•´ë‹¹ ìì‹ì—ì„œ OVERRIDEë¡œ êµ¬í˜„í•˜ì„¸ìš”
     protected override void IStateStartSetting() { }
    
     protected override IEnumerator CorutinePattern()
     {
-        while (dicState[MonsterState.Dead] != machine.CurState)
+        
+        while (dicState[EMonsterState.Dead] != machine.CurState)
         {
-            //°ø°İ °¡´É ¸ó½ºÅÍ°¡ ÀÖÀ» °æ¿ì
+            // ê³µê²© ëŒ€ìƒ ë¦¬ìŠ¤íŠ¸ê°€ ë¹„ì–´ìˆì§€ ì•Šìœ¼ë©´ ê³µê²© ìƒíƒœë¡œ
             if (isAttackMonster.Count > 0)
             {
-                StatePatttern(MonsterState.Attack);
+                StatePatttern(EMonsterState.Attack);
             }
             else
             {
-                StatePatttern(MonsterState.Walk);
+                StatePatttern(EMonsterState.Walk);
             }
 
             yield return new WaitForFixedUpdate();
@@ -85,17 +84,11 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         }
     }
 
-    public override void StatePatttern(MonsterState state)
-    {
-        machine.SetState(dicState[state]);
-    }
+    // ê³µê²© ëŒ€ìƒì´ ë“¤ì–´ì˜¤ë©´ í•´ë‹¹ ì˜¤ë¸Œì íŠ¸ë¥¼ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
+    // ê¸°ë³¸ êµ¬í˜„ì€ ê·¸ëƒ¥ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€ë§Œ í•¨
+    // ë ˆì´ì–´ ë§ˆìŠ¤í‚¹ ë“±ì€ í•„ìš”ì— ë”°ë¼ ë³€í˜•
 
-
-    //¸ó½ºÅÍ ÆĞÅÏÀ» Á¤ÀÇÇØ¼­ ÇØ´ç ÆĞÅÏ´ë·Î ½ÇÇàÇÏµµ·Ï ½ÇÇà
-    //±âº» »óÅÂÀÏ °æ¿ì ±×³É »ó´ë º»ÁøÀ» ÇâÇØ ¿òÁ÷ÀÓ
-    //ÀûÀÌ³ª ¸ñÇ¥¹°¿¡ µµÂøÇÒ °æ¿ì °ø°İ¸ğµå·Î ÀüÈ¯
-
-    //°ø°İ¹üÀ§³»¿¡ ¿Â ¸ó½ºÅÍ¸¦ °¨ÁöÇØ¼­ ÇØ´ç ¸ó½ºÅÍ¸¦ List¿¡ ³ÖÀ½
+    // íŠ¸ë¦¬ê±°ë¡œ ë“¤ì–´ì˜¨ ì˜¤ë¸Œì íŠ¸ë¥¼ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
     private void OnTriggerEnter2D(Collider2D collision)
     {
         AddListIsAttackMonster(collision.gameObject);
@@ -105,23 +98,28 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         OutListIsAttackMonster(collision.gameObject);
     }
 
-    private void AddListIsAttackMonster(GameObject collision)// °ø°İ °¡´É ¸ó½ºÅÍ¸¦ List¿¡ Ãß°¡ÇÔ
+    private void AddListIsAttackMonster(GameObject collision)// ê³µê²© ëŒ€ìƒ ì˜¤ë¸Œì íŠ¸ë¥¼ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
     {
         if (collision.layer == (int)LayerNum.Enemy) isAttackMonster.Add(collision.gameObject);
     }
 
-    private void OutListIsAttackMonster(GameObject collision)//¸®½ºÆ®¿¡ ÇØ´ç ¸ó½ºÅÍ°¡ ÀÖ´ÂÁö È®ÀÎÇÑ ÈÄ ÀÖÀ¸¸é ±× ºÎºĞÀ» ¸®½ºÆ®¿¡¼­ »èÁ¦ÇÔ
+    private void OutListIsAttackMonster(GameObject collision)// ë¦¬ìŠ¤íŠ¸ì— í•´ë‹¹ ì˜¤ë¸Œì íŠ¸ê°€ ìˆìœ¼ë©´ ë¦¬ìŠ¤íŠ¸ì—ì„œ ì‚­ì œ
     {
         if (collision.layer == (int)LayerNum.Enemy)
         {
-            Debug.Log("LIST¿¡¼­ Á¦¿ÜµÊ");
+            Debug.Log("LISTì—ì„œ ì œê±°ë¨");
             if (isAttackMonster.Contains(collision.gameObject)) isAttackMonster.Remove(collision.gameObject);
         }
     }
 
     public void Initialize()
     {
-        //¸ó½ºÅÍ°¡ ¼ÒÈ¯µÇ¾úÀ» °æ¿ì
+        // ì˜¤ë¸Œì íŠ¸ê°€ ì´ˆê¸°í™”ë  ë•Œ í˜¸ì¶œ
+    }
+
+    public override void StatePatttern(EMonsterState state)
+    {
+        machine.SetState(dicState[state]);
     }
 
     public enum Direction
@@ -129,8 +127,8 @@ public class MonsterBase : StatePattern<MonsterState, MonsterBase>, IProduct
         Left = -1,
         Right = 1,
     }
-    //¸ó½ºÅÍ ±âº» °ø°İ
-    //¸ó½ºÅÍ ÀÌµ¿ ±â´É
+    // ëª¬ìŠ¤í„° ê¸°ë³¸ ë ˆì´ì–´
+    // ëª¬ìŠ¤í„° ì´ë™ ê´€ë ¨
     public enum LayerNum { Enemy = 7, Team = 8 }
 
 }

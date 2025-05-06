@@ -7,15 +7,15 @@ public abstract class StatePattern<T, K> : MonoBehaviour
     protected Dictionary<T, IState<K>> dicState = new Dictionary<T, IState<K>>();
     protected StateMachine<K> machine = null;
 
-    //StateÃÊ¹İ ¼³Á¤ ¼¼ÆÃ
+    //StateíŒ¨í„´ ê¸°ë³¸ êµ¬ì¡°
     protected abstract void IStateStartSetting();
 
-    //°¢ÀÚ ÆĞÅÏÀ» Á¤ÀÇÇØ¼­ start½Ã ½ÇÇàÇÑ´Ù.
+    //ìƒíƒœë¥¼ ì „í™˜í•˜ë©´ì„œ startë¥¼ í˜¸ì¶œí•œë‹¤.
     protected abstract IEnumerator CorutinePattern();
 
-    //state¿¡ ¸Â´Â ÆĞÅÏÀ¸·Î º¯°æÇÑ´Ù.
+    //stateì— ë§ëŠ” ë™ì‘ì„ ì‹¤í–‰í•œë‹¤.
     public abstract void StatePatttern(T state);
 
-    //stateUpdate¹®
+    //stateUpdate
     protected abstract void UpdateSetting();
 }
