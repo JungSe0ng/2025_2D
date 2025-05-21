@@ -1,9 +1,10 @@
 using UnityEngine;
 using System.Collections;
+using System.Diagnostics;
 namespace BaseMonsterState
 {
     //기본 idle -> trace(정찰)-> 적발견 -> walk(타겟) -> attack(타겟) ->dead
-
+    //위를 공격 못함 stopdistance는 x값만 생각하도록 변경경
 
 
     // Idle
@@ -15,48 +16,49 @@ namespace BaseMonsterState
             this.baseMonster = baseMonster;
         }
 
-        public void OperateEnter(BaseMonster sender)
-        {
-
-        }
-
-        public void OperateExit(BaseMonster sender)
-        {
-
-        }
-
-        public void OperateUpdate(BaseMonster sender)
-        {
-        }
+        public void OperateEnter() { }
+        public void OperateExit() { }
+        public void OperateUpdate() { }
     }
 
     // Walk
     public class BaseMonsterWalk : IState<BaseMonster>
     {
         private BaseMonster baseMonster;
-
+        private bool isStop = true;
         public BaseMonsterWalk(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
         }
 
-        public void OperateEnter(BaseMonster sender)
+        public void OperateEnter()
         {
-            Debug.Log("목표물로 향해서 이동하겠습니다.");
-            baseMonster.Agent.SetDestination(sender.IsAttackMonster[0].transform.position);
+            baseMonster.Agent.SetDestination(baseMonster.IsAttackMonster[0].transform.position);
+            baseMonster.Agent.isStopped = false;
+            baseMonster.Agent.stoppingDistance = baseMonster.MonsterDB.StopDistance;
             baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
+            isStop = true;
+            baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
+            baseMonster.StartCoroutine(StopWalk());
         }
 
-        public void OperateExit(BaseMonster sender)
+        public void OperateExit()
         {
             baseMonster.Agent.isStopped = true;
             baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), false);
+            isStop = false;
         }
 
-        public void OperateUpdate(BaseMonster sender)
-        {
+        private IEnumerator StopWalk(){
+            while(isStop){
+                if(baseMonster.IsAttackMonster.Count<0)break;
+                yield return new WaitForFixedUpdate();
+            }
         }
 
+        public void OperateUpdate() {
+            
+        }
     }
 
     // CoolTime (기본 구조)
@@ -67,17 +69,9 @@ namespace BaseMonsterState
         {
             this.baseMonster = baseMonster;
         }
-        public void OperateEnter(BaseMonster sender)
-        {
-
-        }
-        public void OperateExit(BaseMonster sender)
-        {
-        }
-        public void OperateUpdate(BaseMonster sender)
-        {
-
-        }
+        public void OperateEnter() { }
+        public void OperateExit() { }
+        public void OperateUpdate() { }
     }
 
     public class BaseMonsterTrace : IState<BaseMonster>
@@ -96,24 +90,22 @@ namespace BaseMonsterState
             traceCorutine = PatrolLoop();
         }
 
-        public void OperateEnter(BaseMonster sender)
-        {
-            Debug.Log("정찰모드 작동중입니다.");
-            sender.StartCoroutine(traceCorutine);
-            sender.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
+        public void OperateEnter()
+        {      
+            baseMonster.StartCoroutine(traceCorutine);
+            baseMonster.Agent.isStopped = false;
+            baseMonster.Agent.stoppingDistance = 0;
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
         }
 
-        public void OperateExit(BaseMonster sender)
+        public void OperateExit()
         {
-            Debug.Log("정찰모드를 종료하겠습니다.");
-            sender.StopCoroutine(traceCorutine);
-            sender.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), false);
+            baseMonster.StopCoroutine(traceCorutine);
+            baseMonster.Agent.isStopped = true;
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), false);
         }
 
-        public void OperateUpdate(BaseMonster sender)
-        {
-
-        }
+        public void OperateUpdate() { }
         private IEnumerator PatrolLoop()
         {
             while (true)
@@ -151,34 +143,37 @@ namespace BaseMonsterState
                 yield return new WaitForSeconds(waitTime);
             }
         }
-
-
     }
 
     // Attack
     public class BaseMonsterAttack : IState<BaseMonster>
     {
         private BaseMonster baseMonster = null;
-
+        private bool isStop = true;
         public BaseMonsterAttack(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
         }
 
-        public void OperateEnter(BaseMonster sender)
+        public void OperateEnter()
         {
+            baseMonster.Agent.isStopped = false;
+            baseMonster.Agent.SetDestination(baseMonster.IsAttackMonster[0].transform.position);
+            baseMonster.Agent.stoppingDistance = baseMonster.MonsterDB.StopDistance;
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsAttack.ToString(), true);
+            isStop = true;
+            baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
 
         }
 
-        public void OperateExit(BaseMonster sender)
+        public void OperateExit()
         {
-
+            baseMonster.Agent.isStopped = true;
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsAttack.ToString(), false);
+            isStop = false;
         }
 
-        public void OperateUpdate(BaseMonster sender)
-        {
-
-        }
+        public void OperateUpdate() { }
     }
 
     // Dead
@@ -191,16 +186,8 @@ namespace BaseMonsterState
             this.baseMonster = baseMonster;
         }
 
-        public void OperateEnter(BaseMonster sender)
-        {
-        }
-
-        public void OperateExit(BaseMonster sender)
-        {
-        }
-
-        public void OperateUpdate(BaseMonster sender)
-        {
-        }
+        public void OperateEnter() { }
+        public void OperateExit() { }
+        public void OperateUpdate() { }
     }
 }

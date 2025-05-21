@@ -49,4 +49,8 @@ public class MonsterScriptableObjects : ScriptableObject
     [SerializeField]
     private float xFlipPos;
     public float XFlipPos {get{return xFlipPos;}}
+
+    [SerializeField]
+    private float stopDistance;
+    public float StopDistance{get{return stopDistance;}}
 }

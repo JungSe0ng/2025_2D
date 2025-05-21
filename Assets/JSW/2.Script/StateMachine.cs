@@ -30,14 +30,14 @@ public class StateMachine<T>
         }
 
         if (CurState != null)
-            CurState.OperateExit(m_sender);
+            CurState.OperateExit();
 
         //상태 객체.
         CurState = state;
 
         //새 상태의 Enter를 호출한다.
         if (CurState != null)
-            CurState.OperateEnter(m_sender);
+            CurState.OperateEnter();
 
 //       Debug.Log("SetNextState : " + state.GetType());
 
@@ -51,6 +51,6 @@ public class StateMachine<T>
             Debug.LogError("invalid m_sener");
             return;
         }
-        CurState.OperateUpdate(m_sender);
+        CurState.OperateUpdate();
     }
 }

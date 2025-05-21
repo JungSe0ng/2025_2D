@@ -30,10 +30,11 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     [SerializeField] protected SpriteRenderer spriteRenderer_img = null;
     public SpriteRenderer SpriteRender_img { get { return spriteRenderer_img; } }
-    //몬스터 생명
-    private float hp = 100.0f;
 
+    [SerializeField] protected CircleCollider2D circleCollider2D = null;
     private Vector3 xpos = Vector3.zero;
+    private float hp = 100.0f;
+    //몬스터 생명
     public float Hp
     {
 
@@ -93,7 +94,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     {
         hp = monsterDB.MonsterHp;
         agent.speed = monsterDB.MoveSpeed;
-
+        circleCollider2D.radius = monsterDB.IsTraceArea;
     }
     protected override IEnumerator CorutinePattern()
     {
@@ -109,12 +110,12 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     }
 
     //타워주변에 있는 몬스터를 감지하여 해당 몬스터를 List에 추가
-    private void OnTriggerEnter(Collider collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
         Debug.Log("타겟을 감지했습니다.");
         AddListIsAttackTarget(collision.gameObject);
     }
-    private void OnTriggerExit(Collider collision)
+    private void OnTriggerExit2D(Collider2D collision)
     {
         OutListIsAttackTarget(collision.gameObject);
     }
@@ -146,6 +147,20 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
         xpos = spriteRenderer_img.gameObject.transform.localPosition;
         xpos.x = isRight ? monsterDB.XFlipPos : monsterDB.XFlipPos * -1;
         spriteRenderer_img.gameObject.transform.localPosition = xpos;
+    }
+
+    public IEnumerator CorutineVir(bool isStop)
+    {
+        while (isStop&&isAttackMonster.Count>0)
+        {
+            float dirX = isAttackMonster[0].transform.position.x - transform.position.x;
+
+            if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
+            {
+                spriteRenderer_img.flipX = dirX < 0;  // 왼쪽이면 true, 오른쪽이면 false
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
     //colider를 사용해서 몬스터 감지
