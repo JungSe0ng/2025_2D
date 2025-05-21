@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: Monster1
   m_EditorClassIdentifier: 
   monsterCodeName: 1
-  monsterName: a
-  monsterHp: 0
-  damage: 0
-  moveSpeed: 2
-  isAttackArea: 1.5
+  monsterName: Monster1
+  monsterHp: 100
+  damage: 10
+  moveSpeed: 10
+  isAttackArea: 5
+  isTraceArea: 20
+  isIdleCoolTime: 1
+  attackCoolTime: 0.5
