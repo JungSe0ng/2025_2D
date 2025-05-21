@@ -45,4 +45,8 @@ public class MonsterScriptableObjects : ScriptableObject
     [SerializeField]
     private float attackCoolTime;
     public float AttackCoolTime { get {return attackCoolTime;} }
+
+    [SerializeField]
+    private float xFlipPos;
+    public float XFlipPos {get{return xFlipPos;}}
 }

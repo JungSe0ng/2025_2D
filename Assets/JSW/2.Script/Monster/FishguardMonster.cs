@@ -1,10 +1,10 @@
 using UnityEngine;
-using FishguardMonsterState;
 public class FishguardMonster : BaseMonster
 {
 
     protected override void IStateStartSetting()
     {
+        /*
         base.IStateStartSetting();
         IState<BaseMonster> idle = new FishguardMonsterIdle(this);
         IState<BaseMonster> walk = new FishguardMonsterWalk(this);
@@ -22,6 +22,6 @@ public class FishguardMonster : BaseMonster
 
         machine = new StateMachine<BaseMonster>(this, dicState[MonsterState.Idle]);
         machine.SetState(dicState[MonsterState.Idle]);
+        */
     }
-
 }

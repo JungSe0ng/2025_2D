@@ -10,7 +10,11 @@ public enum TowerState
 }
 public enum MonsterState
 {
-    Idle = 0, Walk = 1, Run =2, Attack =3, CoolTime =4, Dead =5
+    Idle = 0, Walk = 1, Attack =2, Trace =3,  CoolTime =4, Dead =5
+}
+
+public enum NormalMonsterAnim{
+    IsWalk, IsDead, IsAttack
 }
 
 public enum TowerBuildState{

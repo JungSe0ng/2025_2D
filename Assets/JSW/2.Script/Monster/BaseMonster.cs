@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using NUnit.Framework;
 using Unity.Mathematics;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -9,35 +10,34 @@ using UnityEngine.AI;
 using UnityEngine.Rendering;
 public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 {
-
-    //colider 접근 범위 설정
-    [SerializeField] private BoxCollider attackArea = null;
-
     //몬스터 데이터 접근
-    [SerializeField] private MonsterScriptableObjects monsterDB = null;
+    [SerializeField] protected MonsterScriptableObjects monsterDB = null;
     public MonsterScriptableObjects MonsterDB { get { return monsterDB; } }
 
     //공격 몬스터 리스트
     [SerializeField]
-    private List<GameObject> isAttackMonster = new List<GameObject>();
+    protected List<GameObject> isAttackMonster = new List<GameObject>();
 
-    [SerializeField] private NavMeshAgent agent = null;
+    public List<GameObject> IsAttackMonster { get { return isAttackMonster; } }
+
+    [SerializeField] protected NavMeshAgent agent = null;
     public NavMeshAgent Agent { get { return agent; } }
 
-    public MonsterMode mode = MonsterMode.Normal;
+    protected IEnumerator monsterPatternCorutine = null;
 
-    private GameObject waveTarget = null;
-
-    private IEnumerator monsterPatternCorutine = null;
-
-    [SerializeField] private Animator monsterAnimator = null;
+    [SerializeField] protected Animator monsterAnimator = null;
     public Animator MonsterAnimator { get { return monsterAnimator; } }
+
+    [SerializeField] protected SpriteRenderer spriteRenderer_img = null;
+    public SpriteRenderer SpriteRender_img { get { return spriteRenderer_img; } }
     //몬스터 생명
     private float hp = 100.0f;
+
+    private Vector3 xpos = Vector3.zero;
     public float Hp
     {
 
-        private get { return hp; }
+        get { return hp; }
 
         set
         {
@@ -49,17 +49,11 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     private void Awake()
     {
-        MonsterAwakeSetting();
-    }
-
-    private void MonsterAwakeSetting()//몬스터 초기세팅
-    {
-        //몬스터 공격 범위 설정
-        attackArea.size = new Vector3(monsterDB.IsAttackArea, 10, monsterDB.IsAttackArea);
         IStateStartSetting();
     }
+
     //몬스터가 생성되었을 경우
-    public void Initialize()
+    public virtual void Initialize()
     {
         StatePatttern(MonsterState.Idle);
     }
@@ -67,9 +61,11 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     //몬스터 활성화
     void OnEnable()
     {
+        Debug.Log("시작합니다.");
         StatePatttern(MonsterState.Idle);
         monsterPatternCorutine = CorutinePattern();
         StartCoroutine(monsterPatternCorutine);
+        MonsterDataSetting();
     }
 
     //몬스터 비활성화
@@ -78,47 +74,31 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
         StopCoroutine(monsterPatternCorutine);
     }
 
-
     //
     public override void StatePatttern(MonsterState state)
     {
         machine.SetState(dicState[state]);
     }
 
-    protected override IEnumerator CorutinePattern()
-    {
-        while (dicState[MonsterState.Dead] != machine.CurState)
-        {
-
-            //만약에 WaveMode이거나 목표물이 정해진다면? Run
-            //공격범위 내에 있으면 Attack모드로 변경한다.
-            //아무것도 아니면 Idle상태로 전환
-            if (isAttackMonster.Count > 0)
-            {
-                float dis = Vector3.Distance(isAttackMonster[0].transform.position, transform.position);
-                //대상 거리가 가까운 경우
-                if (dis < 1f) StatePatttern(MonsterState.Attack);
-                if (dis > 1f) StatePatttern(MonsterState.Run);
-            }
-            else if (mode == MonsterMode.WaveMode)
-            {
-                StatePatttern(MonsterState.Run);
-            }
-            else
-            {
-                StatePatttern(MonsterState.Idle);
-            }
-
-            yield return new WaitForFixedUpdate();
-        }
-    }
-
     //몬스터 상태 시작 설정
     protected override void IStateStartSetting()
     {
+        agent.updateRotation = false;
+        agent.updateUpAxis = false;
+
+        //데이터 값들 설정 적용
+        MonsterDataSetting();
+    }
+    private void MonsterDataSetting()
+    {
+        hp = monsterDB.MonsterHp;
+        agent.speed = monsterDB.MoveSpeed;
 
     }
-
+    protected override IEnumerator CorutinePattern()
+    {
+        yield break;
+    }
     protected override void UpdateSetting()
     {
         if (machine != null)
@@ -156,30 +136,16 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     private bool IsAttackTargetLayer(GameObject collision)
     {
         if (collision.layer == (int)LayerNum.Human) return true;
-        if (collision.layer == (int)LayerNum.Tower) return true;
         return false;
     }
 
-    //wave에서 소환된 몬스터들이 목표지점을 향해 공격합니다.
-    // wave에서 소환된 몬스터들이 목표지점을 향해 이동하고, 목표와의 거리를 디버그합니다.
-    public void WaveAttackMode(GameObject target)
+    //flip해서 x축이 바뀌면 x값 위치 보정
+    public void FlipXposChange(bool isRight)
     {
-        waveTarget = target;
-        mode = MonsterMode.WaveMode;
-    }
-
-
-    //Agent Run세팅
-    public void AgentTargetSetting()
-    {
-        if (isAttackMonster.Count > 0) AgentSet(isAttackMonster[0]);
-        else AgentSet(waveTarget);
-    }
-
-    //Agent 일반 목표물 설정
-    public void AgentSet(GameObject obj)
-    {
-        agent.SetDestination(obj.transform.position);
+        // right면 x = 0.35, left면 x = -0.35로 위치 이동
+        xpos = spriteRenderer_img.gameObject.transform.localPosition;
+        xpos.x = isRight ? monsterDB.XFlipPos : monsterDB.XFlipPos * -1;
+        spriteRenderer_img.gameObject.transform.localPosition = xpos;
     }
 
     //colider를 사용해서 몬스터 감지

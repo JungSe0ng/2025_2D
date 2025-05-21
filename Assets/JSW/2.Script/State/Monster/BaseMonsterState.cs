@@ -1,9 +1,13 @@
 using UnityEngine;
-
+using System.Collections;
 namespace BaseMonsterState
 {
+    //기본 idle -> trace(정찰)-> 적발견 -> walk(타겟) -> attack(타겟) ->dead
+
+
+
     // Idle
-    public class BaseMonsterIdle : MonoBehaviour, IState<BaseMonster>
+    public class BaseMonsterIdle : IState<BaseMonster>
     {
         protected BaseMonster baseMonster;
         public BaseMonsterIdle(BaseMonster baseMonster)
@@ -27,88 +31,134 @@ namespace BaseMonsterState
     }
 
     // Walk
-    public class BaseMonsterWalk : MonoBehaviour, IState<BaseMonster>
-    {
-        private float moveSpeed = 3.5f; // 베이스 몬스터의 이동 속도
-
-        public BaseMonsterWalk(BaseMonster BaseMonster)
-        {
-        }
-
-        public void OperateEnter(BaseMonster sender)
-        {
-        }
-
-        public void OperateExit(BaseMonster sender)
-        {
-        }
-
-        public void OperateUpdate(BaseMonster sender)
-        {
-        }
-    }
-
-    // Run
-    public class BaseMonsterRun : MonoBehaviour, IState<BaseMonster>
+    public class BaseMonsterWalk : IState<BaseMonster>
     {
         private BaseMonster baseMonster;
-        private float moveSpeed = 3.5f; // 베이스 몬스터의 이동 속도
 
-        public BaseMonsterRun(BaseMonster baseMonster)
+        public BaseMonsterWalk(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
         }
 
         public void OperateEnter(BaseMonster sender)
         {
-            baseMonster.AgentTargetSetting();
-            Debug.Log("적에게 이동중입니다.");
-            baseMonster.MonsterAnimator.SetBool("IsRun", true);
+            Debug.Log("목표물로 향해서 이동하겠습니다.");
+            baseMonster.Agent.SetDestination(sender.IsAttackMonster[0].transform.position);
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
         }
 
         public void OperateExit(BaseMonster sender)
         {
-            baseMonster.MonsterAnimator.SetBool("IsRun", false);
             baseMonster.Agent.isStopped = true;
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), false);
         }
 
         public void OperateUpdate(BaseMonster sender)
         {
         }
+
     }
 
     // CoolTime (기본 구조)
-    public class BaseMonsterCoolTime : MonoBehaviour, IState<BaseMonster>
+    public class BaseMonsterCoolTime : IState<BaseMonster>
     {
         private BaseMonster baseMonster;
-        private float coolTime = 2.0f; // 쿨타임 예시
-        private float timer = 0f;
         public BaseMonsterCoolTime(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
         }
         public void OperateEnter(BaseMonster sender)
         {
-            timer = 0f;
+
         }
         public void OperateExit(BaseMonster sender)
         {
         }
         public void OperateUpdate(BaseMonster sender)
         {
-            timer += Time.deltaTime;
-            if (timer >= coolTime)
-            {
-            }
+
         }
     }
 
-    // Attack
-    public class BaseMonsterAttack : MonoBehaviour, IState<BaseMonster>
+    public class BaseMonsterTrace : IState<BaseMonster>
     {
         private BaseMonster baseMonster = null;
-        private float attackTimer = 0f;
-        private float attackDelay = 1.5f; // 공격 딜레이
+        public float traceNums = 5f;               // 최대 정찰 거리
+        public LayerMask obstacleLayer;            // 벽 체크용
+        public float waitTime = 0.5f;              // 도착 후 대기 시간
+        private bool movingRight = true;
+        public float distanceThreshold = 0.1f;
+        private IEnumerator traceCorutine = null;
+
+        public BaseMonsterTrace(BaseMonster baseMonster)
+        {
+            this.baseMonster = baseMonster;
+            traceCorutine = PatrolLoop();
+        }
+
+        public void OperateEnter(BaseMonster sender)
+        {
+            Debug.Log("정찰모드 작동중입니다.");
+            sender.StartCoroutine(traceCorutine);
+            sender.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
+        }
+
+        public void OperateExit(BaseMonster sender)
+        {
+            Debug.Log("정찰모드를 종료하겠습니다.");
+            sender.StopCoroutine(traceCorutine);
+            sender.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), false);
+        }
+
+        public void OperateUpdate(BaseMonster sender)
+        {
+
+        }
+        private IEnumerator PatrolLoop()
+        {
+            while (true)
+            {
+                // 1. 이동 방향 설정
+                Vector2 dir = movingRight ? Vector2.right : Vector2.left;
+
+                // 2. Raycast로 벽까지의 거리 측정
+                RaycastHit2D hit = Physics2D.Raycast(baseMonster.transform.position, dir, traceNums, obstacleLayer);
+                float moveDistance = hit.collider != null ? hit.distance : traceNums;
+
+                // 3. 목적지 설정
+                Vector2 destination = (Vector2)baseMonster.transform.position + dir * moveDistance;
+
+                // 4. 이동 시작
+                baseMonster.Agent.SetDestination(destination);
+
+                // 5. 목적지 도달까지 대기
+                while (baseMonster.Agent.pathPending || baseMonster.Agent.remainingDistance > distanceThreshold)
+                {
+                    yield return null;
+                }
+
+                // 6. 방향 반전
+                movingRight = !movingRight;
+
+                // 7. Sprite Flip 처리 (선택)
+                if (baseMonster.SpriteRender_img.TryGetComponent(out SpriteRenderer sr))
+                {
+                    sr.flipX = !movingRight;
+                    baseMonster.FlipXposChange(movingRight);
+                }
+
+                // 8. 대기 시간
+                yield return new WaitForSeconds(waitTime);
+            }
+        }
+
+
+    }
+
+    // Attack
+    public class BaseMonsterAttack : IState<BaseMonster>
+    {
+        private BaseMonster baseMonster = null;
 
         public BaseMonsterAttack(BaseMonster baseMonster)
         {
@@ -117,32 +167,22 @@ namespace BaseMonsterState
 
         public void OperateEnter(BaseMonster sender)
         {
-            attackTimer = 0f;
-            baseMonster.MonsterAnimator.SetBool("IsAttack", true);
+
         }
 
         public void OperateExit(BaseMonster sender)
         {
-            baseMonster.MonsterAnimator.SetBool("IsAttack", false);
+
         }
 
         public void OperateUpdate(BaseMonster sender)
         {
-            attackTimer += Time.deltaTime;
-            if (attackTimer >= attackDelay)
-            {
-                Attack();
-                attackTimer = 0f;
-            }
-        }
 
-        private void Attack()
-        {
         }
     }
 
     // Dead
-    public class BaseMonsterDead : MonoBehaviour, IState<BaseMonster>
+    public class BaseMonsterDead : IState<BaseMonster>
     {
         private BaseMonster baseMonster = null;
 
