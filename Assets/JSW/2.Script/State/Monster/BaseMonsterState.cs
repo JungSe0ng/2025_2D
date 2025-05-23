@@ -149,7 +149,7 @@ namespace BaseMonsterState
     public class BaseMonsterAttack : IState<BaseMonster>
     {
         private BaseMonster baseMonster = null;
-        private bool isStop = true;
+        protected bool isStop = true;
         public BaseMonsterAttack(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
@@ -158,12 +158,13 @@ namespace BaseMonsterState
         public void OperateEnter()
         {
             baseMonster.Agent.isStopped = false;
-            baseMonster.Agent.SetDestination(baseMonster.IsAttackMonster[0].transform.position);
             baseMonster.Agent.stoppingDistance = baseMonster.MonsterDB.StopDistance;
-            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsAttack.ToString(), true);
+            baseMonster.Agent.SetDestination(baseMonster.IsAttackMonster[0].transform.position);
             isStop = true;
             baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
-
+            
+            //override를 진행해서 아래에서 재정의해서 사용이 필요함 공격 애니메이션 타이밍이 다름
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsAttack.ToString(), true);
         }
 
         public void OperateExit()
@@ -174,6 +175,8 @@ namespace BaseMonsterState
         }
 
         public void OperateUpdate() { }
+
+      
     }
 
     // Dead

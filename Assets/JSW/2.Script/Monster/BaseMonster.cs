@@ -158,6 +158,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
             if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
             {
                 spriteRenderer_img.flipX = dirX < 0;  // 왼쪽이면 true, 오른쪽이면 false
+                FlipXposChange(dirX>0);
             }
             yield return new WaitForSeconds(0.1f);
         }
