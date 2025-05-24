@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 622318569}
   - component: {fileID: 622318568}
   - component: {fileID: 622318571}
-  - component: {fileID: 622318570}
+  - component: {fileID: 622318572}
   m_Layer: 0
   m_Name: BoomRobot
   m_TagString: Untagged
@@ -236,28 +236,6 @@ Transform:
   - {fileID: 1432092723}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!195 &622318570
-NavMeshAgent:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 622318565}
-  m_Enabled: 1
-  m_AgentTypeID: 0
-  m_Radius: 0.5
-  m_Speed: 3.5
-  m_Acceleration: 8
-  avoidancePriority: 50
-  m_AngularSpeed: 120
-  m_StoppingDistance: 0
-  m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
-  m_AutoRepath: 1
-  m_Height: 2
-  m_BaseOffset: 0
-  m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 4
 --- !u!114 &622318571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -272,11 +250,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   monsterDB: {fileID: 11400000, guid: c1b3bde86048ac4449872421dbb32c22, type: 2}
   isAttackMonster: []
-  agent: {fileID: 622318570}
+  agent: {fileID: 0}
   monsterAnimator: {fileID: 1422506180}
   spriteRenderer_img: {fileID: 1422506178}
   circleCollider2D: {fileID: 684956513}
-  a: 100
+  player: {fileID: 2033634945}
+  monster: {fileID: 622318569}
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 0
+  moveSpeed: 2
+  gridSize: 21
+--- !u!114 &622318572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 622318565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa9a2ee2a199cb841ba29ffe11559d9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &684956512
 GameObject:
   m_ObjectHideFlags: 0
@@ -449,7 +445,6 @@ MonoBehaviour:
   monsterAnimator: {fileID: 1452079696}
   spriteRenderer_img: {fileID: 1452079697}
   circleCollider2D: {fileID: 1957470941}
-  a: 100
 --- !u!1 &837492437
 GameObject:
   m_ObjectHideFlags: 0

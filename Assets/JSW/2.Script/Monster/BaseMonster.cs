@@ -34,7 +34,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     [SerializeField] protected CircleCollider2D circleCollider2D = null;
     private Vector3 xpos = Vector3.zero;
     private float hp = 100.0f;
-    public int a =100;
+ 
     //몬스터 생명
     public float Hp
     {
@@ -51,7 +51,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     private void Awake()
     {
-        IStateStartSetting();
+        //IStateStartSetting();
     }
 
     //몬스터가 생성되었을 경우
@@ -64,15 +64,10 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     void OnEnable()
     {
         Debug.Log("시작합니다.");
-          foreach (KeyValuePair<MonsterState, IState<BaseMonster>> pair in dicState)
-        {
-            Debug.Log($"Key: {pair.Key}, Value: {pair.Value.GetType().Name}");
-        }
-        Debug.Log(a);
         StatePatttern(MonsterState.Idle);
         monsterPatternCorutine = CorutinePattern();
-        StartCoroutine(monsterPatternCorutine);
-        MonsterDataSetting();
+        //StartCoroutine(monsterPatternCorutine);
+        //MonsterDataSetting();
     }
 
     //몬스터 비활성화
@@ -84,14 +79,14 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     //
     public override void StatePatttern(MonsterState state)
     {
-        machine.SetState(dicState[state]);
+//        machine.SetState(dicState[state]);
     }
 
     //몬스터 상태 시작 설정
     protected override void IStateStartSetting()
     {
         agent.updateRotation = false;
-        agent.updateUpAxis = false;
+      agent.updateUpAxis = false;
 
         //데이터 값들 설정 적용
         MonsterDataSetting();
