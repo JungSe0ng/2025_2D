@@ -34,6 +34,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     [SerializeField] protected CircleCollider2D circleCollider2D = null;
     private Vector3 xpos = Vector3.zero;
     private float hp = 100.0f;
+    public int a =100;
     //몬스터 생명
     public float Hp
     {
@@ -63,6 +64,11 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     void OnEnable()
     {
         Debug.Log("시작합니다.");
+          foreach (KeyValuePair<MonsterState, IState<BaseMonster>> pair in dicState)
+        {
+            Debug.Log($"Key: {pair.Key}, Value: {pair.Value.GetType().Name}");
+        }
+        Debug.Log(a);
         StatePatttern(MonsterState.Idle);
         monsterPatternCorutine = CorutinePattern();
         StartCoroutine(monsterPatternCorutine);
