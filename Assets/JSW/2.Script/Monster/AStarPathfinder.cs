@@ -7,8 +7,6 @@ public class AstarPathfinder : MonoBehaviour
     [Header("Grid Settings")]
     [SerializeField] private int gridRange = 100;
     [SerializeField] private float nodeRadius = 0.5f;
-    [SerializeField] private LayerMask obstacleLayer;
-
     [SerializeField] private float distanceBuffer = 0f;
 
     private AStarNode[,] grid;
@@ -18,9 +16,10 @@ public class AstarPathfinder : MonoBehaviour
     private Vector2 lastGridCenter; // 마지막으로 그리드를 생성한 중심 좌표
     private float regenThreshold = 5.0f; // 일정 거리 이상 이동하면 재생성
 
+    private BaseMonster baseMonster = null;
     private void Start()
     {
-        obstacleLayer = 1 << LayerMask.NameToLayer("ObstacleLayer");
+        baseMonster = GetComponent<BaseMonster>();
         nodeDiameter = nodeRadius * 2f;
         GenerateGrid();
     }
@@ -36,10 +35,6 @@ public class AstarPathfinder : MonoBehaviour
             Debug.Log("좌표를 다시 만들겠습니다.");
             GenerateGrid();
             FindPath(targetPos);
-        }
-        else
-        {
-
         }
 
         if (path.Count == 0)
@@ -66,12 +61,14 @@ public class AstarPathfinder : MonoBehaviour
             for (int y = 0; y < grid.GetLength(1); y++)
             {
                 Vector2 worldPoint = bottomLeft + new Vector2(x * nodeDiameter, y * nodeDiameter);
-                bool isWall = Physics2D.OverlapCircle(worldPoint, 0.3f, obstacleLayer);
+                bool isWall = Physics2D.OverlapCircle(worldPoint, 0.3f, 1<<10);
 
                 grid[x, y] = new AStarNode(worldPoint, x, y, isWall);
                 grid[x, y].G = int.MaxValue;
             }
         }
+    DebugPrintGridWallStates();
+    //Debug.LogError("멈춰");
     }
 
     public void PrintGrid(AStarNode a)
@@ -191,9 +188,9 @@ public class AstarPathfinder : MonoBehaviour
         if (path.Count == 0) return;
 
         Vector2 targetPos = path[0].worldPos;
-        transform.position = Vector2.MoveTowards(transform.position, targetPos, Time.deltaTime * 3f);
+        transform.position = Vector2.MoveTowards(transform.position, targetPos, Time.deltaTime * baseMonster.MonsterDB.MoveSpeed);
 
-        if (Vector2.Distance(transform.position, targetPos) < 0.1f)
+        if (Vector2.Distance(transform.position, targetPos) < baseMonster.MonsterDB.StopDistance)
         {
             path.RemoveAt(0);
         }
@@ -222,14 +219,16 @@ public class AstarPathfinder : MonoBehaviour
                 {
                     AStarNode neighbor = grid[checkX, checkY];
 
-                    // 거친 건조: 포켓 통과 안 해서 돌아가려면 사이로의 수형/수택에 방패물이 있지 않아야 한다.
+                    // ✅ 1. 기본 벽 체크 (모든 방향 공통)
+                    if (neighbor.isWall) continue;
+
+                    // ✅ 2. 대각선일 경우 코너 통과 여부 확인
                     bool isDiagonal = dx != 0 && dy != 0;
                     if (isDiagonal)
                     {
-                        AStarNode nodeH = grid[node.gridX + dx, node.gridY];
-                        AStarNode nodeV = grid[node.gridX, node.gridY + dy];
+                        AStarNode nodeH = grid[node.gridX + dx, node.gridY]; // 수평
+                        AStarNode nodeV = grid[node.gridX, node.gridY + dy]; // 수직
 
-                        // 포켓 건너가기 금지
                         if (nodeH.isWall || nodeV.isWall)
                             continue;
                     }
@@ -239,6 +238,7 @@ public class AstarPathfinder : MonoBehaviour
             }
         }
     }
+
 
 
     private int GetDistance(AStarNode a, AStarNode b)

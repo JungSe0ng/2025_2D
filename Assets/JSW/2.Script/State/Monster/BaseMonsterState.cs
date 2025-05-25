@@ -35,8 +35,6 @@ namespace NormalMonsterState
         public virtual void OperateEnter()
         {
             //이동 목적지 설정
-            baseMonster.APath.FindPathTarget(baseMonster.IsAttackMonster[0].transform.position);
-
             baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
             isStop = true;
             baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
@@ -60,7 +58,7 @@ namespace NormalMonsterState
 
         public virtual void OperateUpdate()
         {
-
+               baseMonster.APath.FindPathTarget(baseMonster.IsAttackMonster[0].transform.position);
         }
     }
 
@@ -81,17 +79,15 @@ namespace NormalMonsterState
     {
         protected BaseMonster baseMonster = null;
         public float traceNums = 5f;               // 최대 정찰 거리
-        public LayerMask obstacleLayer;            // 벽 체크용
         public float waitTime = 0.5f;              // 도착 후 대기 시간
         private bool movingRight = true;
-        public float distanceThreshold = 0.5f;
+        public float distanceThreshold = 0.6f;
         private IEnumerator traceCorutine = null;
         private Vector2 destination = Vector2.zero;
         public NormalMonsterTrace(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
             traceCorutine = PatrolLoop();
-            obstacleLayer = LayerMask.NameToLayer("ObstacleLayer");
         }
 
         public virtual void OperateEnter()
@@ -109,8 +105,8 @@ namespace NormalMonsterState
         public virtual void OperateUpdate()
         {
             if (destination == null) return;
-            //Debug.Log("이동중");
-            baseMonster.APath.FindPathTarget((Vector3)destination);
+            //Debug.Log(destination);
+            baseMonster.APath.FindPathTarget(destination);
         }
         private IEnumerator PatrolLoop()
         {
@@ -120,22 +116,15 @@ namespace NormalMonsterState
                 Vector2 dir = movingRight ? Vector2.right : Vector2.left;
 
                 // 2. Raycast로 벽까지의 거리 측정
-                RaycastHit2D hit = Physics2D.Raycast(baseMonster.transform.position, dir, int.MaxValue, obstacleLayer);
-                float moveDistance = hit.collider != null ? hit.distance : traceNums;
+                RaycastHit2D hit = Physics2D.Raycast(baseMonster.transform.position, dir, traceNums, 1<<10);
+                float moveDistance = hit.collider != null ? hit.distance-0.5f : traceNums;
                 // 3. 목적지 설정
                 destination = (Vector2)baseMonster.transform.position + dir * moveDistance;
-                if (hit.collider != null)
-                {
-                    Debug.Log(hit.transform.gameObject.name);
-                }else{
-                    Debug.Log("인식되는 벽이 없어서 그냥 5이동");
-                    Debug.Log(destination);
-                }
 
                 //목적지로 이동
                 // 5. 목적지 도달까지 대기
-                while (Vector3.Distance(baseMonster.transform.position , destination) > distanceThreshold)
-                {      
+                while (Vector3.Distance(baseMonster.transform.position, destination) > distanceThreshold)
+                {        
                     yield return null;
                 }
                 //Debug.Log(baseMonster.APath.targetDis+" " +destination+"목적지 입니다.");
@@ -169,8 +158,6 @@ namespace NormalMonsterState
         public virtual void OperateEnter()
         {
             //타겟 지점으로 이동
-
-
             isStop = true;
             baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
 
@@ -205,11 +192,13 @@ namespace NormalMonsterState
 
         public virtual void OperateEnter()
         {
+            Debug.Log("죽었습니다.");
             baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsDead.ToString(), true);
             //
         }
         public virtual void OperateExit()
         {
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsDead.ToString(), false);
             //비활성화 모드로 돌아감..
 
         }

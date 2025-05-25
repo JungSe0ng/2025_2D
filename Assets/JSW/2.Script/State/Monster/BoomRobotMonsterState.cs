@@ -79,7 +79,7 @@ namespace BoomRobotMonsterState
     // Attack
     public class BoomRobotMonsterAttack : NormalMonsterAttack
     {
-        private float boomTime =5.0f;
+        private float boomTime =2.0f;
         public bool isBoom = false;
         public BoomRobotMonsterAttack(BaseMonster baseMonster) : base(baseMonster) {}
 
