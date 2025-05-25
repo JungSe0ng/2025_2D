@@ -35,7 +35,7 @@ namespace NormalMonsterState
         public virtual void OperateEnter()
         {
             //이동 목적지 설정
-            //baseMonster.APath.PathFind(baseMonster.IsAttackMonster[0].transform.position);
+            baseMonster.APath.FindPathTarget(baseMonster.IsAttackMonster[0].transform.position);
 
             baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
             isStop = true;
@@ -110,7 +110,7 @@ namespace NormalMonsterState
         {
             if (destination == null) return;
             //Debug.Log("이동중");
-           // baseMonster.APath.PathFind((Vector3)destination);
+            baseMonster.APath.FindPathTarget((Vector3)destination);
         }
         private IEnumerator PatrolLoop()
         {
@@ -187,7 +187,7 @@ namespace NormalMonsterState
         public virtual void OperateUpdate()
         {
             if (baseMonster.IsAttackMonster.Count <= 0) return;
-           // baseMonster.APath.PathFind(baseMonster.IsAttackMonster[0].transform.position);
+            baseMonster.APath.FindPathTarget(baseMonster.IsAttackMonster[0].transform.position);
         }
 
 

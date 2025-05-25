@@ -1,13 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using NUnit.Framework;
-using Unity.Mathematics;
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Rendering;
+
+
 public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 {
     //몬스터 데이터 접근
@@ -30,8 +26,8 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     [SerializeField] protected CircleCollider2D circleCollider2D = null;
 
-    //protected AstarPathfinder aPath = null;
-    //public AstarPathfinder APath {get{return aPath; }}
+    protected AstarPathfinder aPath= null;
+    public AstarPathfinder APath {get{return aPath; }}
     private Vector3 xpos = Vector3.zero;
     private float hp = 100.0f;
  
@@ -51,7 +47,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     private void Awake()
     {
-     //   aPath= GetComponent<AstarPathfinder>();
+        aPath= GetComponent<AstarPathfinder>();
        // Debug.Log(aPath);
         IStateStartSetting();
     }

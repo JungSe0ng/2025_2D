@@ -1,53 +1,65 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
 using UnityEngine;
 
-public class MonsterPathfinder : MonoBehaviour
+public class AstarPathfinder : MonoBehaviour
 {
     [Header("Grid Settings")]
     [SerializeField] private int gridRange = 100;
     [SerializeField] private float nodeRadius = 0.5f;
     [SerializeField] private LayerMask obstacleLayer;
 
-    [Header("Target Settings")]
-    [SerializeField] private Transform target;
     [SerializeField] private float distanceBuffer = 0f;
 
     private AStarNode[,] grid;
     private List<AStarNode> path = new List<AStarNode>();
     private Vector2 bottomLeft;
     private float nodeDiameter;
+    private Vector2 lastGridCenter; // 마지막으로 그리드를 생성한 중심 좌표
+    private float regenThreshold = 5.0f; // 일정 거리 이상 이동하면 재생성
 
     private void Start()
     {
         obstacleLayer = 1 << LayerMask.NameToLayer("ObstacleLayer");
-
         nodeDiameter = nodeRadius * 2f;
         GenerateGrid();
-        FindPath();
     }
 
-    private void Update()
+    public void FindPathTarget(Vector3 targetPos)
     {
-        if(path.Count==0)FindPath();
-        if (target == null) return;
-
-        float dist = Vector2.Distance(transform.position, target.position);
+        float dist = Vector2.Distance(transform.position, targetPos);
         if (dist < distanceBuffer) return;
-        Debug.Log(path.Count);
-        FollowPath();
-        for(int i=0; i<path.Count; i++){
-            Debug.Log(path[i].worldPos);
+
+        // 🧠 플레이어가 이동해서 중심에서 멀어졌는지 확인
+        if (Vector2.Distance(transform.position, lastGridCenter) > regenThreshold)
+        {
+            Debug.Log("좌표를 다시 만들겠습니다.");
+            GenerateGrid();
+            FindPath(targetPos);
+        }
+        else
+        {
+
         }
 
+        if (path.Count == 0)
+            FindPath(targetPos);
+
+        FollowPath();
     }
 
     private void GenerateGrid()
     {
+        nodeDiameter = nodeRadius * 2f;
+
+        // 🧩 노드 격자 정렬된 중심으로 설정
+        lastGridCenter = new Vector2(
+            Mathf.Round(transform.position.x / nodeDiameter) * nodeDiameter,
+            Mathf.Round(transform.position.y / nodeDiameter) * nodeDiameter
+        );
+        bottomLeft = lastGridCenter - new Vector2(gridRange, gridRange) * nodeDiameter;
+
         grid = new AStarNode[gridRange * 2 + 1, gridRange * 2 + 1];
-        bottomLeft = (Vector2)transform.position - new Vector2(gridRange, gridRange) * nodeDiameter;
 
         for (int x = 0; x < grid.GetLength(0); x++)
         {
@@ -57,9 +69,11 @@ public class MonsterPathfinder : MonoBehaviour
                 bool isWall = Physics2D.OverlapCircle(worldPoint, 0.3f, obstacleLayer);
 
                 grid[x, y] = new AStarNode(worldPoint, x, y, isWall);
+                grid[x, y].G = int.MaxValue;
             }
         }
     }
+
     public void PrintGrid(AStarNode a)
     {
         Debug.Log(a.gridX + " " + a.gridY + " " + a.worldPos);
@@ -90,12 +104,12 @@ public class MonsterPathfinder : MonoBehaviour
     }
 
 
-    private void FindPath()
+    private void FindPath(Vector3 target)
     {
         path.Clear();
 
         AStarNode startNode = GetClosestNode(transform.position);
-        AStarNode endNode = GetClosestNode(target.position);
+        AStarNode endNode = GetClosestNode(target);
         AStarNode bestSoFarNode = startNode;
 
         List<AStarNode> openList = new List<AStarNode>();
@@ -105,7 +119,7 @@ public class MonsterPathfinder : MonoBehaviour
 
         while (openList.Count > 0)
         {
-            
+
             AStarNode current = openList[0];
             for (int i = 1; i < openList.Count; i++)
             {
@@ -193,38 +207,38 @@ public class MonsterPathfinder : MonoBehaviour
     }
 
     private IEnumerable<AStarNode> GetNeighbors(AStarNode node)
-{
-    for (int dx = -1; dx <= 1; dx++)
     {
-        for (int dy = -1; dy <= 1; dy++)
+        for (int dx = -1; dx <= 1; dx++)
         {
-            if (dx == 0 && dy == 0) continue;
-
-            int checkX = node.gridX + dx;
-            int checkY = node.gridY + dy;
-
-            if (checkX >= 0 && checkX < grid.GetLength(0) &&
-                checkY >= 0 && checkY < grid.GetLength(1))
+            for (int dy = -1; dy <= 1; dy++)
             {
-                AStarNode neighbor = grid[checkX, checkY];
+                if (dx == 0 && dy == 0) continue;
 
-                // 거친 건조: 포켓 통과 안 해서 돌아가려면 사이로의 수형/수택에 방패물이 있지 않아야 한다.
-                bool isDiagonal = dx != 0 && dy != 0;
-                if (isDiagonal)
+                int checkX = node.gridX + dx;
+                int checkY = node.gridY + dy;
+
+                if (checkX >= 0 && checkX < grid.GetLength(0) &&
+                    checkY >= 0 && checkY < grid.GetLength(1))
                 {
-                    AStarNode nodeH = grid[node.gridX + dx, node.gridY];
-                    AStarNode nodeV = grid[node.gridX, node.gridY + dy];
+                    AStarNode neighbor = grid[checkX, checkY];
 
-                    // 포켓 건너가기 금지
-                    if (nodeH.isWall || nodeV.isWall)
-                        continue;
+                    // 거친 건조: 포켓 통과 안 해서 돌아가려면 사이로의 수형/수택에 방패물이 있지 않아야 한다.
+                    bool isDiagonal = dx != 0 && dy != 0;
+                    if (isDiagonal)
+                    {
+                        AStarNode nodeH = grid[node.gridX + dx, node.gridY];
+                        AStarNode nodeV = grid[node.gridX, node.gridY + dy];
+
+                        // 포켓 건너가기 금지
+                        if (nodeH.isWall || nodeV.isWall)
+                            continue;
+                    }
+
+                    yield return neighbor;
                 }
-
-                yield return neighbor;
             }
         }
     }
-}
 
 
     private int GetDistance(AStarNode a, AStarNode b)
