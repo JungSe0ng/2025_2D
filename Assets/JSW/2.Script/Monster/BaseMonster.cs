@@ -20,9 +20,6 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     public List<GameObject> IsAttackMonster { get { return isAttackMonster; } }
 
-    [SerializeField] protected NavMeshAgent agent = null;
-    public NavMeshAgent Agent { get { return agent; } }
-
     protected IEnumerator monsterPatternCorutine = null;
 
     [SerializeField] protected Animator monsterAnimator = null;
@@ -32,6 +29,9 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     public SpriteRenderer SpriteRender_img { get { return spriteRenderer_img; } }
 
     [SerializeField] protected CircleCollider2D circleCollider2D = null;
+
+    //protected AstarPathfinder aPath = null;
+    //public AstarPathfinder APath {get{return aPath; }}
     private Vector3 xpos = Vector3.zero;
     private float hp = 100.0f;
  
@@ -51,7 +51,9 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     private void Awake()
     {
-        //IStateStartSetting();
+     //   aPath= GetComponent<AstarPathfinder>();
+       // Debug.Log(aPath);
+        IStateStartSetting();
     }
 
     //몬스터가 생성되었을 경우
@@ -66,8 +68,8 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
         Debug.Log("시작합니다.");
         StatePatttern(MonsterState.Idle);
         monsterPatternCorutine = CorutinePattern();
-        //StartCoroutine(monsterPatternCorutine);
-        //MonsterDataSetting();
+        StartCoroutine(monsterPatternCorutine);
+        MonsterDataSetting();
     }
 
     //몬스터 비활성화
@@ -79,14 +81,12 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     //
     public override void StatePatttern(MonsterState state)
     {
-//        machine.SetState(dicState[state]);
+        machine.SetState(dicState[state]);
     }
 
     //몬스터 상태 시작 설정
     protected override void IStateStartSetting()
     {
-        agent.updateRotation = false;
-      agent.updateUpAxis = false;
 
         //데이터 값들 설정 적용
         MonsterDataSetting();
@@ -94,12 +94,15 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     private void MonsterDataSetting()
     {
         hp = monsterDB.MonsterHp;
-        agent.speed = monsterDB.MoveSpeed;
         circleCollider2D.radius = monsterDB.IsTraceArea;
     }
     protected override IEnumerator CorutinePattern()
     {
         yield break;
+    }
+    void Update()
+    {
+        UpdateSetting();
     }
     protected override void UpdateSetting()
     {

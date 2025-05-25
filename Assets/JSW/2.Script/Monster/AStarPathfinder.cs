@@ -1,102 +1,56 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AStar2DPathfinder :MonoBehaviour
+public class MonsterAStarPathfinder
 {
-    private int width, height;
-    private float nodeRadius = 0.4f;
-    private LayerMask obstacleMask;
-    private Node[,] grid;
-    private Vector2 originWorldPos;
+    private AStarGrid grid;
 
-    public AStar2DPathfinder(int width, int height, LayerMask obstacleMask)
+    public MonsterAStarPathfinder(AStarGrid grid)
     {
-        this.width = width;
-        this.height = height;
-        this.obstacleMask = obstacleMask;
+        this.grid = grid;
     }
 
-    // Node 클래스 정의
-    public class Node
+    public List<Vector2> FindPath(Vector2 startPos, Vector2 targetPos)
     {
-        public bool walkable;
-        public Vector2Int gridPos;
-        public Vector2 worldPos;
-        public int gCost, hCost;
-        public int fCost => gCost + hCost;
-        public Node parent;
+        Node startNode = grid.NodeFromWorldPoint(startPos);
+        Node targetNode = grid.NodeFromWorldPoint(targetPos);
 
-        public Node(bool walkable, Vector2Int gridPos, Vector2 worldPos)
+        List<Node> openSet = new();
+        HashSet<Node> closedSet = new();
+
+        openSet.Add(startNode);
+
+        while (openSet.Count > 0)
         {
-            this.walkable = walkable;
-            this.gridPos = gridPos;
-            this.worldPos = worldPos;
-        }
-    }
-
-    // 목적지 Vector2 좌표를 받아 이동 경로 반환
-    public List<Vector2> GetPathToTarget(Vector2 startWorldPos, Vector2 targetWorldPos)
-    {
-        GenerateGrid(startWorldPos);
-        Node startNode = WorldToNode(startWorldPos);
-        Node targetNode = WorldToNode(targetWorldPos);
-        return FindPath(startNode, targetNode);
-    }
-
-    // 플레이어 Transform을 받아 이동 경로 반환
-    public List<Vector2> GetPathToPlayer(Vector2 startWorldPos, Transform playerTransform)
-    {
-        return GetPathToTarget(startWorldPos, playerTransform.position);
-    }
-
-    // 그리드 생성 (몬스터 기준으로 중심 생성)
-    private void GenerateGrid(Vector2 center)
-    {
-        grid = new Node[width, height];
-        originWorldPos = center - new Vector2(width / 2, height / 2);
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
+            Node current = openSet[0];
+            for (int i = 1; i < openSet.Count; i++)
             {
-                Vector2 worldPos = originWorldPos + new Vector2(x + 0.5f, y + 0.5f);
-                bool walkable = !Physics2D.OverlapCircle(worldPos, nodeRadius, obstacleMask);
-                grid[x, y] = new Node(walkable, new Vector2Int(x, y), worldPos);
-            }
-        }
-    }
-
-    // A* 경로 탐색 (성능 최적화용 간단 힙 구조 PriorityQueue 대체)
-    private List<Vector2> FindPath(Node start, Node target)
-    {
-        var open = new SimplePriorityQueue<Node>();
-        var closed = new HashSet<Node>();
-
-        start.gCost = 0;
-        start.hCost = GetDistance(start, target);
-        open.Enqueue(start, start.fCost);
-
-        while (open.Count > 0)
-        {
-            Node current = open.Dequeue();
-            closed.Add(current);
-
-            if (current == target)
-                return RetracePath(start, target);
-
-            foreach (Node neighbor in GetNeighbors(current))
-            {
-                if (!neighbor.walkable || closed.Contains(neighbor)) continue;
-
-                int newCost = current.gCost + GetDistance(current, neighbor);
-                if (newCost < neighbor.gCost || !open.Contains(neighbor))
+                if (openSet[i].fCost < current.fCost || openSet[i].fCost == current.fCost && openSet[i].hCost < current.hCost)
                 {
-                    neighbor.gCost = newCost;
-                    neighbor.hCost = GetDistance(neighbor, target);
+                    current = openSet[i];
+                }
+            }
+
+            openSet.Remove(current);
+            closedSet.Add(current);
+
+            if (current == targetNode)
+                return RetracePath(startNode, targetNode);
+
+            foreach (Node neighbor in GetNeighbours(current))
+            {
+                if (!neighbor.walkable || closedSet.Contains(neighbor))
+                    continue;
+
+                int newMovementCost = current.gCost + GetDistance(current, neighbor);
+                if (newMovementCost < neighbor.gCost || !openSet.Contains(neighbor))
+                {
+                    neighbor.gCost = newMovementCost;
+                    neighbor.hCost = GetDistance(neighbor, targetNode);
                     neighbor.parent = current;
 
-                    if (!open.Contains(neighbor))
-                        open.Enqueue(neighbor, neighbor.fCost);
+                    if (!openSet.Contains(neighbor))
+                        openSet.Add(neighbor);
                 }
             }
         }
@@ -108,100 +62,123 @@ public class AStar2DPathfinder :MonoBehaviour
     {
         List<Vector2> path = new();
         Node current = end;
+
         while (current != start)
         {
-            path.Add(current.worldPos);
+            path.Add(current.worldPosition);
             current = current.parent;
         }
+
         path.Reverse();
         return path;
     }
 
-    private Node WorldToNode(Vector2 worldPos)
+    private List<Node> GetNeighbours(Node node)
     {
-        Vector2 relative = worldPos - originWorldPos;
-        int x = Mathf.Clamp(Mathf.FloorToInt(relative.x), 0, width - 1);
-        int y = Mathf.Clamp(Mathf.FloorToInt(relative.y), 0, height - 1);
-        return grid[x, y];
-    }
+        List<Node> neighbours = new();
 
-    private List<Node> GetNeighbors(Node node)
-    {
-        List<Node> neighbors = new();
-        Vector2Int[] dirs = {
-            new(0, 1), new(1, 0), new(0, -1), new(-1, 0), // 직선
-            new(1, 1), new(-1, 1), new(1, -1), new(-1, -1) // 대각선
-        };
-
-        foreach (var d in dirs)
+        for (int dx = -1; dx <= 1; dx++)
         {
-            int nx = node.gridPos.x + d.x;
-            int ny = node.gridPos.y + d.y;
-            if (nx >= 0 && nx < width && ny >= 0 && ny < height)
+            for (int dy = -1; dy <= 1; dy++)
             {
-                // 코너 회피 (대각선일 경우 양옆이 막혀있으면 제외)
-                if (Mathf.Abs(d.x) + Mathf.Abs(d.y) == 2)
+                if (dx == 0 && dy == 0) continue;
+
+                int checkX = node.gridX + dx;
+                int checkY = node.gridY + dy;
+
+                if (checkX >= 0 && checkX < grid.GetGrid().GetLength(0) &&
+                    checkY >= 0 && checkY < grid.GetGrid().GetLength(1))
                 {
-                    if (!grid[node.gridPos.x + d.x, node.gridPos.y].walkable ||
-                        !grid[node.gridPos.x, node.gridPos.y + d.y].walkable)
-                        continue;
+                    neighbours.Add(grid.GetGrid()[checkX, checkY]);
                 }
-                neighbors.Add(grid[nx, ny]);
             }
         }
-        return neighbors;
+
+        return neighbours;
     }
 
     private int GetDistance(Node a, Node b)
     {
-        int dx = Mathf.Abs(a.gridPos.x - b.gridPos.x);
-        int dy = Mathf.Abs(a.gridPos.y - b.gridPos.y);
-        return dx > dy ? 14 * dy + 10 * (dx - dy) : 14 * dx + 10 * (dy - dx);
+        int dstX = Mathf.Abs(a.gridX - b.gridX);
+        int dstY = Mathf.Abs(a.gridY - b.gridY);
+
+        return (dstX > dstY) ? 14 * dstY + 10 * (dstX - dstY) : 14 * dstX + 10 * (dstY - dstX);
     }
 }
 
-// 간단한 최소 힙 기반 PriorityQueue 구현 (성능용)
-public class SimplePriorityQueue<T>
+
+public class AStarGrid
 {
-    private List<(T item, int priority)> heap = new();
-    public int Count => heap.Count;
+    private Node[,] grid;
+    private int gridSizeX, gridSizeY;
+    private float nodeRadius;
+    private LayerMask unwalkableMask;
+    private Vector2 gridWorldSize;
+    private Vector2 origin;
 
-    public void Enqueue(T item, int priority)
+    public AStarGrid(Vector2 origin, Vector2 size, float nodeRadius, LayerMask unwalkableMask)
     {
-        heap.Add((item, priority));
-        int c = heap.Count - 1;
-        while (c > 0)
+        this.origin = origin;
+        this.gridWorldSize = size;
+        this.nodeRadius = nodeRadius;
+        this.unwalkableMask = unwalkableMask;
+        this.gridSizeX = Mathf.RoundToInt(size.x / (nodeRadius * 2));
+        this.gridSizeY = Mathf.RoundToInt(size.y / (nodeRadius * 2));
+
+        CreateGrid();
+    }
+
+    private void CreateGrid()
+    {
+        grid = new Node[gridSizeX, gridSizeY];
+        Vector2 bottomLeft = origin - new Vector2(gridWorldSize.x / 2, gridWorldSize.y / 2);
+
+        for (int x = 0; x < gridSizeX; x++)
         {
-            int p = (c - 1) / 2;
-            if (heap[c].priority >= heap[p].priority) break;
-            (heap[c], heap[p]) = (heap[p], heap[c]);
-            c = p;
+            for (int y = 0; y < gridSizeY; y++)
+            {
+                Vector2 worldPoint = bottomLeft + new Vector2(x * nodeRadius * 2 + nodeRadius, y * nodeRadius * 2 + nodeRadius);
+                bool walkable = !Physics2D.OverlapCircle(worldPoint, nodeRadius, unwalkableMask);
+                if(walkable == false)Debug.Log(x+" "+y+" 가 벽");
+                grid[x, y] = new Node(walkable, worldPoint, x, y);
+            }
         }
     }
 
-    public T Dequeue()
+    public Node NodeFromWorldPoint(Vector2 worldPosition)
     {
-        int li = heap.Count - 1;
-        (heap[0], heap[li]) = (heap[li], heap[0]);
-        T ret = heap[li].item;
-        heap.RemoveAt(li);
-        li--;
-        int p = 0;
-        while (true)
-        {
-            int c = p * 2 + 1;
-            if (c > li) break;
-            int rc = c + 1;
-            if (rc <= li && heap[rc].priority < heap[c].priority) c = rc;
-            if (heap[p].priority <= heap[c].priority) break;
-            (heap[p], heap[c]) = (heap[c], heap[p]);
-            p = c;
-        }
-        return ret;
+        float percentX = Mathf.Clamp01((worldPosition.x - (origin.x - gridWorldSize.x / 2)) / gridWorldSize.x);
+        float percentY = Mathf.Clamp01((worldPosition.y - (origin.y - gridWorldSize.y / 2)) / gridWorldSize.y);
+
+        int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
+        int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
+
+        return grid[x, y];
     }
 
-    public bool Contains(T item)
+    public Node[,] GetGrid() => grid;
+    public int GetMaxSize() => gridSizeX * gridSizeY;
+}
+
+
+public class Node
+{
+    public Vector2 worldPosition;
+    public bool walkable;
+    public int gridX;
+    public int gridY;
+
+    public int gCost;
+    public int hCost;
+    public Node parent;
+
+    public int fCost => gCost + hCost;
+
+    public Node(bool walkable, Vector2 worldPosition, int x, int y)
     {
-        return heap.Exists(e => EqualityComparer<T>.Default.Equals(e.item, item));
+        this.walkable = walkable;
+        this.worldPosition = worldPosition;
+        this.gridX = x;
+        this.gridY = y;
     }
 }
