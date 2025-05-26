@@ -163,6 +163,10 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
             yield return new WaitForSeconds(0.1f);
         }
     }
-
+    
+    //피해를 입었을 경우 hp감소
+    public void DamagedHp(int num){
+        Hp -= num;
+    }
     //colider를 사용해서 몬스터 감지
 }
