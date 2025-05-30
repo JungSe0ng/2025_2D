@@ -1,13 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
-using NUnit.Framework;
-using Unity.Mathematics;
-using UnityEditor.Animations;
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Rendering;
+
+
 public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 {
     //몬스터 데이터 접근
@@ -20,9 +16,6 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     public List<GameObject> IsAttackMonster { get { return isAttackMonster; } }
 
-    [SerializeField] protected NavMeshAgent agent = null;
-    public NavMeshAgent Agent { get { return agent; } }
-
     protected IEnumerator monsterPatternCorutine = null;
 
     [SerializeField] protected Animator monsterAnimator = null;
@@ -32,8 +25,12 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     public SpriteRenderer SpriteRender_img { get { return spriteRenderer_img; } }
 
     [SerializeField] protected CircleCollider2D circleCollider2D = null;
+
+    protected AstarPathfinder aPath= null;
+    public AstarPathfinder APath {get{return aPath; }}
     private Vector3 xpos = Vector3.zero;
     private float hp = 100.0f;
+ 
     //몬스터 생명
     public float Hp
     {
@@ -50,6 +47,8 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
 
     private void Awake()
     {
+        aPath= GetComponent<AstarPathfinder>();
+       // Debug.Log(aPath);
         IStateStartSetting();
     }
 
@@ -84,8 +83,6 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     //몬스터 상태 시작 설정
     protected override void IStateStartSetting()
     {
-        agent.updateRotation = false;
-        agent.updateUpAxis = false;
 
         //데이터 값들 설정 적용
         MonsterDataSetting();
@@ -93,12 +90,15 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     private void MonsterDataSetting()
     {
         hp = monsterDB.MonsterHp;
-        agent.speed = monsterDB.MoveSpeed;
         circleCollider2D.radius = monsterDB.IsTraceArea;
     }
     protected override IEnumerator CorutinePattern()
     {
         yield break;
+    }
+    void Update()
+    {
+        UpdateSetting();
     }
     protected override void UpdateSetting()
     {
@@ -158,10 +158,15 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
             if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
             {
                 spriteRenderer_img.flipX = dirX < 0;  // 왼쪽이면 true, 오른쪽이면 false
+                FlipXposChange(dirX>0);
             }
             yield return new WaitForSeconds(0.1f);
         }
     }
-
+    
+    //피해를 입었을 경우 hp감소
+    public void DamagedHp(int num){
+        Hp -= num;
+    }
     //colider를 사용해서 몬스터 감지
 }
