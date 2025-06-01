@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -15,7 +16,7 @@ public class AstarPathfinder : MonoBehaviour
     private float nodeDiameter;
     private Vector2 lastGridCenter; // 마지막으로 그리드를 생성한 중심 좌표
     private float regenThreshold = 5.0f; // 일정 거리 이상 이동하면 재생성
-
+    private Vector3 subVector;
     private BaseMonster baseMonster = null;
     private void Start()
     {
@@ -24,25 +25,57 @@ public class AstarPathfinder : MonoBehaviour
         GenerateGrid();
     }
 
-    public void FindPathTarget(Vector3 targetPos)
+    public void FindPathTarget(Vector3 targetPos, int correction = 0)
     {
         float dist = Vector2.Distance(transform.position, targetPos);
-        if (dist < distanceBuffer) return;
+        if (dist < distanceBuffer && correction == 0) return;
 
         // 🧠 플레이어가 이동해서 중심에서 멀어졌는지 확인
         if (Vector2.Distance(transform.position, lastGridCenter) > regenThreshold)
         {
             Debug.Log("좌표를 다시 만들겠습니다.");
             GenerateGrid();
+            //해당 좌표가 이동 가능한 좌표인지?
+            CheckSidePos(correction, targetPos);
             FindPath(targetPos);
         }
-
         if (path.Count == 0)
+        {
+            CheckSidePos(correction, targetPos);
             FindPath(targetPos);
-
-        FollowPath();
+        }
+        //        Debug.Log(targetPos+"위치로 이동하겟습니다.");
+        FollowPath(correction);
     }
 
+    private void CheckSidePos(int correction, Vector3 targetPos)
+    {
+        if (correction == 1 || correction == -1)
+        {
+            subVector = targetPos;
+            targetPos.x += correction * 1.1f;
+            AStarNode node = GetClosestNode(targetPos);
+            //벽이 아니면 변경된 위치로 변경 벽이면 다른 좌표 -> 그래도 벽이면 원래 좌표
+            if (node.isWall)
+            {
+                Debug.LogError("해당 좌표가 벽입니다.");
+                //반대 좌표로 이동한다.
+                targetPos.x -= correction * 2.2f;
+
+
+                node = GetClosestNode(targetPos);
+
+                //그래도 벽이면? 원래 타겟으로 변경한다.
+                if (node.isWall)
+                {
+                    targetPos = subVector;
+                    Debug.Log("모든 좌표가 벽입니다. 몬스터 위치로 이동합니다." + targetPos);
+                }
+
+            }
+            Debug.Log(targetPos);
+        }
+    }
     private void GenerateGrid()
     {
         nodeDiameter = nodeRadius * 2f;
@@ -61,14 +94,14 @@ public class AstarPathfinder : MonoBehaviour
             for (int y = 0; y < grid.GetLength(1); y++)
             {
                 Vector2 worldPoint = bottomLeft + new Vector2(x * nodeDiameter, y * nodeDiameter);
-                bool isWall = Physics2D.OverlapCircle(worldPoint, 0.3f, 1<<10);
+                bool isWall = Physics2D.OverlapCircle(worldPoint, 0.3f, 1 << 10);
 
                 grid[x, y] = new AStarNode(worldPoint, x, y, isWall);
                 grid[x, y].G = int.MaxValue;
             }
         }
-    DebugPrintGridWallStates();
-    //Debug.LogError("멈춰");
+        DebugPrintGridWallStates();
+        //Debug.LogError("멈춰");
     }
 
     public void PrintGrid(AStarNode a)
@@ -183,14 +216,16 @@ public class AstarPathfinder : MonoBehaviour
         path.Reverse();
     }
 
-    private void FollowPath()
+    private void FollowPath(int correction)
     {
         if (path.Count == 0) return;
 
         Vector2 targetPos = path[0].worldPos;
+        Debug.Log(targetPos+"위치로 이동중");
         transform.position = Vector2.MoveTowards(transform.position, targetPos, Time.deltaTime * baseMonster.MonsterDB.MoveSpeed);
 
-        if (Vector2.Distance(transform.position, targetPos) < baseMonster.MonsterDB.StopDistance)
+        //해당 grid에 도착하면 멈춤
+        if (Vector2.Distance(transform.position, targetPos) < 0.01f)
         {
             path.RemoveAt(0);
         }

@@ -2,6 +2,7 @@ using UnityEngine;
 using FlameRobotMonsterState;
 using NormalMonsterState;
 using System.Collections.Generic;
+using System.Collections;
 public class FlameMonster : NormalMonster
 {
     protected override void IStateStartSetting()
