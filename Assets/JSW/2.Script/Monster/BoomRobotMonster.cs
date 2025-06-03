@@ -14,27 +14,27 @@ public class BoomRobotMonster : NormalMonster
         IState<BaseMonster> dead = new BoomRobotMonsterDead(this);
 
 
-        dicState.Add(MonsterState.Idle, idle);
-        dicState.Add(MonsterState.Attack, attack);
-        dicState.Add(MonsterState.Trace, trace);
-        dicState.Add(MonsterState.Dead, dead);
+        dicState.Add(EMonsterState.Idle, idle);
+        dicState.Add(EMonsterState.Attack, attack);
+        dicState.Add(EMonsterState.Trace, trace);
+        dicState.Add(EMonsterState.Dead, dead);
 
-        machine = new StateMachine<BaseMonster>(this, dicState[MonsterState.Idle]);
+        machine = new StateMachine<BaseMonster>(this, dicState[EMonsterState.Idle]);
     }
 
     protected override IEnumerator CorutinePattern()
     {
-        while (dicState[MonsterState.Dead] != machine.CurState)
+        while (dicState[EMonsterState.Dead] != machine.CurState)
         {
 
             //공격 범위내에 들어온 몬스터를 찾았다?
             if (isAttackMonster.Count > 0)
             {
-                StatePatttern(MonsterState.Attack);
+                StatePatttern(EMonsterState.Attack);
             }
             else
             {
-                StatePatttern(MonsterState.Trace);
+                StatePatttern(EMonsterState.Trace);
             }
 
             yield return new WaitForFixedUpdate();

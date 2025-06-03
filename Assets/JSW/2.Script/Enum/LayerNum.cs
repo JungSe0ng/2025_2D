@@ -8,10 +8,11 @@ public enum TowerState
 {
     Idle = 0, Attack =1, CoolTime =2, UpGrade =3, DeActive =4
 }
-public enum MonsterState
+public enum EMonsterState
 {
-    Idle = 0, Walk = 1, Attack =2, Trace =3,  CoolTime =4, Dead =5
+    Idle = 0, Walk = 1, Attack =2, Trace =3,  CoolTime =4, Dead =5,BrustShoot =6, JumpFly =7,Missile =8
 }
+
 
 public enum NormalMonsterAnim{
     IsWalk, IsDead, IsAttack

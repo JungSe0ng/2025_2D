@@ -69,7 +69,7 @@ namespace FlameRobotMonsterState
             yield return new WaitForSeconds(3.0f);
             //다음 쿨타임 state로 전환한다. 쿨타임에서 변경이 안되도록 설정해준다.
             flame.isChangeState = false;
-            baseMonster.StatePatttern(MonsterState.Idle);
+            baseMonster.StatePatttern(EMonsterState.Idle);
         }
     }
 
@@ -104,7 +104,7 @@ namespace FlameRobotMonsterState
         {
 
             //몬스터 거리가 멀어지면 idle상태로 전환한다.
-            if (baseMonster.IsAttackMonster.Count < 0) baseMonster.StatePatttern(MonsterState.Idle);
+            if (baseMonster.IsAttackMonster.Count < 0) baseMonster.StatePatttern(EMonsterState.Idle);
 
             //몬스터를 찾아서 이동을 한다.
             if (baseMonster.IsAttackMonster.Count > 0)
@@ -128,7 +128,7 @@ namespace FlameRobotMonsterState
             coolTime = 0.0f;
             //다음 쿨타임 state로 전환한다. 쿨타임에서 변경이 안되도록 설정해준다.
             flame.isChangeState = true;
-            baseMonster.StatePatttern(MonsterState.CoolTime);
+            baseMonster.StatePatttern(EMonsterState.CoolTime);
         }
     }
 

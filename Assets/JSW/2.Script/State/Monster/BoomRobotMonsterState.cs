@@ -60,7 +60,7 @@ namespace BoomRobotMonsterState
             Boom();
         }
         private void Boom(){
-            baseMonster.StatePatttern(MonsterState.Dead);
+            baseMonster.StatePatttern(EMonsterState.Dead);
             Debug.Log("자폭 모드 작동");
         }
     }
@@ -79,7 +79,7 @@ namespace BoomRobotMonsterState
         public override void OperateEnter() {
             base.OperateEnter();
             Debug.Log("자폭했습니다.");
-            baseMonster.StatePatttern(MonsterState.Idle);
+            baseMonster.StatePatttern(EMonsterState.Idle);
         }
 
         public override void OperateExit() {

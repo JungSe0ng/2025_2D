@@ -30,7 +30,7 @@ public class AstarPathfinder : MonoBehaviour
     public void FindPathTarget(ref Vector3 targetPos, int correction = 0)
     {
         float dist = Vector2.Distance(transform.position, targetPos);
-        if (dist < distanceBuffer && correction == 0) return;
+        if (dist < baseMonster.MonsterDB.StopDistance && correction == 0) return;
 
         // 🧠 플레이어가 이동해서 중심에서 멀어졌는지 확인
         if (Vector2.Distance(transform.position, lastGridCenter) > regenThreshold)
@@ -39,14 +39,14 @@ public class AstarPathfinder : MonoBehaviour
             GenerateGrid();
             //해당 좌표가 이동 가능한 좌표인지?
             CheckSidePos(correction, ref targetPos);
-            FindPath(ref targetPos);
+            FindPath(targetPos);
         }
         if (path.Count == 0)
         {
             CheckSidePos(correction, ref targetPos);
-            FindPath(ref targetPos);
+            FindPath(targetPos);
         }
-        FollowPath(correction);
+        FollowPath();
     }
 
     //만약 현재 위치 좌표에서 이동을 원하는 값이랑 같은 경우.. 위치를 변경하지 않는다.
@@ -138,7 +138,7 @@ public class AstarPathfinder : MonoBehaviour
     }
 
 
-    private void FindPath(ref Vector3 target)
+    private void FindPath(Vector3 target)
     {
         path.Clear();
 
@@ -220,7 +220,7 @@ public class AstarPathfinder : MonoBehaviour
         path.Reverse();
     }
 
-    private void FollowPath(int correction)
+    private void FollowPath()
     {
         if (path.Count == 0) return;
 

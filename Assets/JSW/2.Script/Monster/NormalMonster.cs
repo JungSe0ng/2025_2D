@@ -9,7 +9,7 @@ public class NormalMonster : BaseMonster, IProduct
     }
     protected override IEnumerator CorutinePattern()
     {
-        while (dicState[MonsterState.Dead] != machine.CurState)
+        while (dicState[EMonsterState.Dead] != machine.CurState)
         {
 
             //공격 범위내에 들어온 몬스터를 찾았다?
@@ -19,12 +19,12 @@ public class NormalMonster : BaseMonster, IProduct
                 float dis = Vector3.Distance(isAttackMonster[0].transform.position, transform.position);
 
                 //거리가 1미만으로 이동하면 공격모드로 전환한다.?
-                if (dis < monsterDB.IsAttackArea) StatePatttern(MonsterState.Attack);
-                if (dis > monsterDB.IsAttackArea) StatePatttern(MonsterState.Walk);
+                if (dis < monsterDB.IsAttackArea) StatePatttern(EMonsterState.Attack);
+                if (dis > monsterDB.IsAttackArea) StatePatttern(EMonsterState.Walk);
             }
             else
             {
-                StatePatttern(MonsterState.Trace);
+                StatePatttern(EMonsterState.Trace);
             }
 
             yield return new WaitForFixedUpdate();

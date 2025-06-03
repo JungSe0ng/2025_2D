@@ -27,7 +27,7 @@ public class MonsterScriptableObjects : ScriptableObject
     private float moveSpeed;
     public float MoveSpeed { get { return moveSpeed; } }
 
-    //공격 범위 쿨타임
+    //공격 범위
     [SerializeField]
     private float isAttackArea;
     public float IsAttackArea { get {return isAttackArea;} }
@@ -37,14 +37,10 @@ public class MonsterScriptableObjects : ScriptableObject
     private float isTraceArea;
     public float IsTraceArea { get {return isTraceArea;} }
 
-    [SerializeField]
-    private float isIdleCoolTime;
-    public float IsCoolTime { get {return isIdleCoolTime;} }
-
     //공격 쿨타임
     [SerializeField]
-    private float attackCoolTime;
-    public float AttackCoolTime { get {return attackCoolTime;} }
+    private float coolTime;
+    public float CoolTime { get {return coolTime;} }
 
     [SerializeField]
     private float xFlipPos;

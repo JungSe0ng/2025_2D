@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
+public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
 {
     //몬스터 데이터 접근
     [SerializeField] protected MonsterScriptableObjects monsterDB = null;
@@ -29,6 +29,8 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     protected AstarPathfinder aPath= null;
     public AstarPathfinder APath {get{return aPath; }}
     private Vector3 xpos = Vector3.zero;
+
+    public EMonsterState nextState;
     private float hp = 100.0f;
  
     //몬스터 생명
@@ -41,7 +43,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
         {
             hp = value;
             //체력이 0미만으로 내려가면 죽은 상태로 변경
-            if (hp < 0.0f) StatePatttern(MonsterState.Dead);
+            if (hp < 0.0f) StatePatttern(EMonsterState.Dead);
         }
     }
 
@@ -55,14 +57,14 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     //몬스터가 생성되었을 경우
     public virtual void Initialize()
     {
-        StatePatttern(MonsterState.Idle);
+        StatePatttern(EMonsterState.Idle);
     }
 
     //몬스터 활성화
     void OnEnable()
     {
         Debug.Log("시작합니다.");
-        StatePatttern(MonsterState.Idle);
+        StatePatttern(EMonsterState.Idle);
         monsterPatternCorutine = CorutinePattern();
         StartCoroutine(monsterPatternCorutine);
         MonsterDataSetting();
@@ -75,7 +77,7 @@ public class BaseMonster : StatePattern<MonsterState, BaseMonster>, IProduct
     }
 
     //
-    public override void StatePatttern(MonsterState state)
+    public override void StatePatttern(EMonsterState state)
     {
         machine.SetState(dicState[state]);
     }
