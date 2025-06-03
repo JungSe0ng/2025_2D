@@ -12,6 +12,7 @@ namespace NormalMonsterState
     public class NormalMonsterIdle : IState<BaseMonster>
     {
         protected BaseMonster baseMonster;
+        protected Vector3 targetPos;
         public NormalMonsterIdle(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
@@ -26,6 +27,7 @@ namespace NormalMonsterState
     public class NormalMonsterWalk : IState<BaseMonster>
     {
         protected BaseMonster baseMonster;
+        protected Vector3 targetPos;
         private bool isStop = true;
         public NormalMonsterWalk(BaseMonster baseMonster)
         {
@@ -58,7 +60,8 @@ namespace NormalMonsterState
 
         public virtual void OperateUpdate()
         {
-               baseMonster.APath.FindPathTarget(baseMonster.IsAttackMonster[0].transform.position);
+            targetPos = baseMonster.IsAttackMonster[0].transform.position;
+            baseMonster.APath.FindPathTarget(ref targetPos);
         }
     }
 
@@ -70,14 +73,15 @@ namespace NormalMonsterState
         {
             this.baseMonster = baseMonster;
         }
-        public void OperateEnter() { }
-        public void OperateExit() { }
-        public void OperateUpdate() { }
+        public virtual void OperateEnter() { }
+        public virtual void OperateExit() { }
+        public virtual void OperateUpdate() { }
     }
 
     public class NormalMonsterTrace : IState<BaseMonster>
     {
         protected BaseMonster baseMonster = null;
+        protected Vector3 targetPos;
         public float traceNums = 5f;               // 최대 정찰 거리
         public float waitTime = 0.5f;              // 도착 후 대기 시간
         private bool movingRight = true;
@@ -104,9 +108,8 @@ namespace NormalMonsterState
 
         public virtual void OperateUpdate()
         {
-            if (destination == null) return;
-            //Debug.Log(destination);
-            baseMonster.APath.FindPathTarget(destination);
+            targetPos = new Vector3(destination.x, destination.y, 0f);
+            baseMonster.APath.FindPathTarget(ref targetPos);
         }
         private IEnumerator PatrolLoop()
         {
@@ -150,6 +153,7 @@ namespace NormalMonsterState
     {
         protected BaseMonster baseMonster = null;
         protected bool isStop = true;
+        protected Vector3 targetPos;
         public NormalMonsterAttack(BaseMonster baseMonster)
         {
             this.baseMonster = baseMonster;
@@ -174,7 +178,8 @@ namespace NormalMonsterState
         public virtual void OperateUpdate()
         {
             if (baseMonster.IsAttackMonster.Count <= 0) return;
-            baseMonster.APath.FindPathTarget(baseMonster.IsAttackMonster[0].transform.position);
+            targetPos = baseMonster.IsAttackMonster[0].transform.position;
+            baseMonster.APath.FindPathTarget(ref targetPos);
         }
 
 

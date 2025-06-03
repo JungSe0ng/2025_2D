@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Text;
 using UnityEngine;
 
@@ -18,6 +19,7 @@ public class AstarPathfinder : MonoBehaviour
     private float regenThreshold = 5.0f; // 일정 거리 이상 이동하면 재생성
     private Vector3 subVector;
     private BaseMonster baseMonster = null;
+
     private void Start()
     {
         baseMonster = GetComponent<BaseMonster>();
@@ -25,7 +27,7 @@ public class AstarPathfinder : MonoBehaviour
         GenerateGrid();
     }
 
-    public void FindPathTarget(Vector3 targetPos, int correction = 0)
+    public void FindPathTarget(ref Vector3 targetPos, int correction = 0)
     {
         float dist = Vector2.Distance(transform.position, targetPos);
         if (dist < distanceBuffer && correction == 0) return;
@@ -36,46 +38,48 @@ public class AstarPathfinder : MonoBehaviour
             Debug.Log("좌표를 다시 만들겠습니다.");
             GenerateGrid();
             //해당 좌표가 이동 가능한 좌표인지?
-            CheckSidePos(correction, targetPos);
-            FindPath(targetPos);
+            CheckSidePos(correction, ref targetPos);
+            FindPath(ref targetPos);
         }
         if (path.Count == 0)
         {
-            CheckSidePos(correction, targetPos);
-            FindPath(targetPos);
+            CheckSidePos(correction, ref targetPos);
+            FindPath(ref targetPos);
         }
-        //        Debug.Log(targetPos+"위치로 이동하겟습니다.");
         FollowPath(correction);
     }
 
-    private void CheckSidePos(int correction, Vector3 targetPos)
+    //만약 현재 위치 좌표에서 이동을 원하는 값이랑 같은 경우.. 위치를 변경하지 않는다.
+    private void CheckSidePos(int correction, ref Vector3 targetPos)
     {
-        if (correction == 1 || correction == -1)
+        //만약 현재 위치 좌표에서 이동을 원하는 값이랑 같은 경우.. 위치를 변경하지 않는다.
+        //타겟 지점에서 변경된 지점 x좌표와 현재 좌표의 차이가 0.1f미만일 경우 실행되지 않게 변경한다.
+        if (correction != 1 && correction != -1) return;
+        if (Mathf.Abs(targetPos.x - transform.position.x) < 0.1f) return;
+        subVector = targetPos;
+        targetPos.x += correction * 1.1f;
+        AStarNode node = GetClosestNode(targetPos);
+        //벽이 아니면 변경된 위치로 변경 벽이면 다른 좌표 -> 그래도 벽이면 원래 좌표
+        if (node.isWall)
         {
-            subVector = targetPos;
-            targetPos.x += correction * 1.1f;
-            AStarNode node = GetClosestNode(targetPos);
-            //벽이 아니면 변경된 위치로 변경 벽이면 다른 좌표 -> 그래도 벽이면 원래 좌표
+            Debug.LogError("해당 좌표가 벽입니다.");
+            //반대 좌표로 이동한다.
+            targetPos.x -= correction * 2.2f;
+
+
+            node = GetClosestNode(targetPos);
+
+            //그래도 벽이면? 원래 타겟으로 변경한다.
             if (node.isWall)
             {
-                Debug.LogError("해당 좌표가 벽입니다.");
-                //반대 좌표로 이동한다.
-                targetPos.x -= correction * 2.2f;
-
-
-                node = GetClosestNode(targetPos);
-
-                //그래도 벽이면? 원래 타겟으로 변경한다.
-                if (node.isWall)
-                {
-                    targetPos = subVector;
-                    Debug.Log("모든 좌표가 벽입니다. 몬스터 위치로 이동합니다." + targetPos);
-                }
-
+                targetPos = subVector;
+                Debug.Log("모든 좌표가 벽입니다. 몬스터 위치로 이동합니다." + targetPos);
             }
-            Debug.Log(targetPos);
+
         }
+        //Debug.Log(targetPos);
     }
+
     private void GenerateGrid()
     {
         nodeDiameter = nodeRadius * 2f;
@@ -134,7 +138,7 @@ public class AstarPathfinder : MonoBehaviour
     }
 
 
-    private void FindPath(Vector3 target)
+    private void FindPath(ref Vector3 target)
     {
         path.Clear();
 
@@ -221,7 +225,7 @@ public class AstarPathfinder : MonoBehaviour
         if (path.Count == 0) return;
 
         Vector2 targetPos = path[0].worldPos;
-        Debug.Log(targetPos+"위치로 이동중");
+        Debug.Log(targetPos + "위치로 이동중");
         transform.position = Vector2.MoveTowards(transform.position, targetPos, Time.deltaTime * baseMonster.MonsterDB.MoveSpeed);
 
         //해당 grid에 도착하면 멈춤

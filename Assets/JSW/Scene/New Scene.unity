@@ -417,6 +417,7 @@ MonoBehaviour:
   monsterAnimator: {fileID: 1452079696}
   spriteRenderer_img: {fileID: 1452079697}
   circleCollider2D: {fileID: 1957470941}
+  isChangeState: 0
 --- !u!114 &752259224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3947,7 +3948,7 @@ Transform:
   m_GameObject: {fileID: 2033634942}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0.02, y: 0.13, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
