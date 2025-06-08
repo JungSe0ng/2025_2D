@@ -27,6 +27,7 @@ public class BossMonster : NormalMonster
         IState<BaseMonster> jumpFly = new BossMonsterJumpFly(this);
         coolTime = new BossMonsterCoolTime(this);
         IState<BaseMonster> dead = new BossMonsterDead(this);
+        IState<BaseMonster> missile = new BossMonsterMissile(this);
 
         dicState.Add(EMonsterState.Idle, idle);
         dicState.Add(EMonsterState.Walk, walk);
@@ -34,6 +35,7 @@ public class BossMonster : NormalMonster
         dicState.Add(EMonsterState.JumpFly, jumpFly);
         dicState.Add(EMonsterState.CoolTime, coolTime);
         dicState.Add(EMonsterState.Dead, dead);
+        dicState.Add(EMonsterState.Missile, missile);
 
         machine = new StateMachine<BaseMonster>(this, dicState[EMonsterState.Idle]);
     }

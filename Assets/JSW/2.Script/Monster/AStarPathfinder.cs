@@ -225,11 +225,11 @@ public class AstarPathfinder : MonoBehaviour
         if (path.Count == 0) return;
 
         Vector2 targetPos = path[0].worldPos;
-       // Debug.Log(targetPos + "위치로 이동중");
+        Debug.Log(targetPos + "위치로 이동중");
         transform.position = Vector2.MoveTowards(transform.position, targetPos, Time.deltaTime * baseMonster.MonsterDB.MoveSpeed);
 
         //해당 grid에 도착하면 멈춤
-        if (Vector2.Distance(transform.position, targetPos) < 0.01f)
+        if (Vector2.Distance(transform.position, targetPos) < 0.1f)
         {
             path.RemoveAt(0);
         }

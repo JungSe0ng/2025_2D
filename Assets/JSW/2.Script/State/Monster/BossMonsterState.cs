@@ -2,8 +2,8 @@ using UnityEngine;
 using System.Collections;
 using Unity.Mathematics;
 using System.Collections.Generic;
-using UnityEngine.Video;
-using Unity.VisualScripting;
+using System.Runtime.CompilerServices;
+using UnityEngine.Rendering.UI;
 namespace BossMonsterState
 {
     // Idle
@@ -49,28 +49,16 @@ namespace BossMonsterState
             Debug.Log("보스가 레이저 모드를 시작합니다.");
             //플레이어 방향을 기준으로 5개의 레이저를 발사한다. 맨처음 생성자 부분에서 레이저를 생산한다.
             ShootLaser();
-
             //발사 이후 다음 단계를 위한 코루틴 단계를 실행한다.
             bossMonster.StartCoroutine(FinishShootLaser());
         }
-          public  void OOnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    {
-        Debug.Log("애니메이션 상태 종료됨: " + stateInfo.shortNameHash);
-    }
-
         private IEnumerator FinishShootLaser()
         {
-            AnimatorStateInfo info = bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0);
-            while (bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f || !bossMonster.IsDead())
+            while (bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1.0f && !bossMonster.IsDead())
             {
-                Debug.Log(bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime);
-                if (info.IsName("Attack") && info.normalizedTime >= 1f)
-                {
-                    Debug.LogError("애니메이션 끝");
-                }
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.01f);
             }
-            Debug.Log("레이저 난사를 종료합니다.");
+            Debug.Log("shootanimation종료");
             if (!bossMonster.IsDead())
                 cnt++;
             if (cnt >= 2)
@@ -142,7 +130,9 @@ namespace BossMonsterState
             bossMonster.MonsterAnimator.SetFloat("IsAttack", 0);
             Debug.Log("보스가 레이저 모드를 종료합니다.");
         }
-        public virtual void OperateUpdate() { }
+        public virtual void OperateUpdate() {
+            Debug.Log(bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime);
+         }
     }
 
     // JumpFly
@@ -163,10 +153,7 @@ namespace BossMonsterState
         private IEnumerator FinishJump() //JumpAnimation이 끝나면 바로 FlyAnimation을 실행한다.
         {
             bossMonster.MonsterAnimator.SetFloat("IsJump", 1);
-            while (bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f || !bossMonster.IsDead())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
+            yield return new WaitForSeconds(0.5f);
             bossMonster.MonsterAnimator.SetFloat("IsJump", 2);
             bossMonster.StartCoroutine(FinishFly());
         }
@@ -174,25 +161,21 @@ namespace BossMonsterState
         private IEnumerator FinishFly() //FlyAnimation이 끝나면 바로 목표 지점 가운데에 도달하면 다음 단계로 넘어간다.
         {
             //목표지점
-            while (Vector3.Distance(bossMonster.transform.position, mainPos) > 0.1f || !bossMonster.IsDead())
+            while (Vector3.Distance(bossMonster.transform.position, mainPos) > 0.1f && !bossMonster.IsDead())
             {
+                Debug.Log((Vector3.Distance(bossMonster.transform.position, mainPos)+"거리가 남았습니다."));
                 //목표물 지점으로 날아감.
                 bossMonster.transform.position = Vector3.MoveTowards(
                     bossMonster.transform.position,
                     mainPos,
-                    1.0f * Time.deltaTime
+                    100.0f * Time.deltaTime
                 );
                 yield return new WaitForSeconds(0.1f);
             }
 
             Debug.Log("목표 지점에 도착했습니다. 착지합니다.");
             bossMonster.MonsterAnimator.SetFloat("IsJump", 3);
-
-
-            while (bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1.0f || !bossMonster.IsDead())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
+            yield return new WaitForSeconds(0.4f);
             Debug.Log("착지를 종료합니다. 다음 쿨타임으로 넘어갑니다.");
 
             //목표물에 도착을 했으면 다음 단계로 쿨타임으로 갔다가 미사일 모드로 변경한다.
@@ -201,6 +184,7 @@ namespace BossMonsterState
         }
         public virtual void OperateExit()
         {
+            bossMonster.MonsterAnimator.SetFloat("IsJump", 0);
             Debug.Log("보스가 점프 모드를 종료합니다.");
         }
         public virtual void OperateUpdate() { }
@@ -259,7 +243,7 @@ namespace BossMonsterState
     {
         protected BaseMonster bossMonster;
         protected float coolTime = 0;
-        private float maxCoolTime = 1.0f;
+        private float maxCoolTime = 3.0f;
         public float MaxCoolTime { set { maxCoolTime = value; } }
         public BossMonsterCoolTime(BaseMonster bossMonster) { this.bossMonster = bossMonster; }
         public virtual void OperateEnter()
@@ -298,32 +282,29 @@ namespace BossMonsterState
             missileArr = new Queue<IBullet>();
             InstanceMissile();
         }
+
         public virtual void OperateEnter()
         {
             //시작을 하면 연속으로 5번을 발사하게 한다. 쿨타임 0.1초를 기준으로 발사한다. 총알은 유도탄이 되어 있다.
             Debug.Log("보스가 미사일 모드를 시작합니다.");
-            ShootMissile();
-
+            //ShootMissile();
+            bossMonster.MonsterAnimator.SetFloat("IsAttack", 2);
+            bossMonster.StartCoroutine(CorutineMissile());
         }
         private IEnumerator CorutineMissile()
         {
-            //애니메이션을 실행한다.
-            bossMonster.MonsterAnimator.SetFloat("IsAttack", 2);
-
+            //애니메이션을 실행한다.    
+            yield return new WaitForSeconds(0.8f);
             //0.1초를 간격으로 미사일을 발사한다.
             for (int i = 0; i < 5; i++)
             {
                 ShootMissile();
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.8f);
             }
             //다음 루트로 이동을 지시한다.
             bossMonster.nextState = EMonsterState.Walk;
             bossMonster.StatePatttern(EMonsterState.CoolTime);
         }
-
-        //플레이어 방향을 계싼해서 해당 방향 5군데를 미리 선정하고 그 방향대로 보내버리면 되곘다.
-        //플레이어 방향 계산-> 플레이어 위치 받아서  내위치랑 비교해서 내가 오른쪽이면 좌측 방향 5군데를 계산한다. 내가 좌측이면 우측 방향을 기준으로 5군데를 계산한다.
-        //계산 기준은 본인 (0,1) (1,1) (1,0) , (1,-1), (0,-1) 이렇게 5군데를 계산한다.
         private void ShootMissile() //미사일 하나 꺼내서 미사일을 다음 좌표로 쏘라고 명령한다.
         {
             OutMissile(0).Shoot(bossMonster.IsAttackMonster[0].transform.position);
