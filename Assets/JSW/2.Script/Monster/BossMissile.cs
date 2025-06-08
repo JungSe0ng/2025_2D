@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class BossMissile : MonoBehaviour, IBullet
@@ -57,4 +59,22 @@ public class BossMissile : MonoBehaviour, IBullet
         // 폭발 이펙트 등 추가 가능
         Destroy(gameObject);
     }
-} 
+
+    public IBullet OutBullet(Transform parent, Vector3 position, Quaternion rotation)
+    {
+        transform.SetParent(parent);
+        transform.position = position;
+        transform.rotation = rotation;
+        gameObject.SetActive(true);
+        return this;
+    }
+
+    public IBullet InBullet(Transform parent)
+    {
+        transform.SetParent(parent);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        gameObject.SetActive(false);
+        return this;
+    }
+}

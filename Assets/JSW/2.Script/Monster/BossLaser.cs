@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class BossLaser : MonoBehaviour, IBullet
@@ -37,5 +39,25 @@ public class BossLaser : MonoBehaviour, IBullet
             // if (player != null) player.TakeDamage(damage);
         }
         Destroy(gameObject);
+    }
+    //위치 최기화를 하고 부모 위치에 들어간다. array에 들어간다.
+
+    public IBullet InBullet(Transform parent)
+    {
+        transform.SetParent(parent);
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = quaternion.identity;
+        gameObject.SetActive(false);
+        return this;
+    }
+    
+
+    public IBullet OutBullet(Transform parent, Vector3 position, Quaternion rotation)
+    {
+        transform.SetParent(parent);
+        transform.position = position;
+        transform.rotation = rotation;
+        gameObject.SetActive(true);
+        return this;
     }
 } 

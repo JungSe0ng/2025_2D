@@ -182,10 +182,10 @@ GameObject:
   m_Component:
   - component: {fileID: 752259219}
   - component: {fileID: 752259221}
-  - component: {fileID: 752259223}
   - component: {fileID: 752259224}
+  - component: {fileID: 752259225}
   m_Layer: 0
-  m_Name: FlameRobot
+  m_Name: BossRobot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -207,6 +207,7 @@ Transform:
   - {fileID: 1452079698}
   - {fileID: 1957470940}
   - {fileID: 1034460429}
+  - {fileID: 1087201117}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &752259221
@@ -236,24 +237,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!114 &752259223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 752259218}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4244477cf3988c40b5f8e712883dbf4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  monsterDB: {fileID: 11400000, guid: ee5c4319d39aa904a9636996c715aa96, type: 2}
-  isAttackMonster: []
-  monsterAnimator: {fileID: 1452079696}
-  spriteRenderer_img: {fileID: 1452079697}
-  circleCollider2D: {fileID: 1957470941}
-  isChangeState: 0
 --- !u!114 &752259224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -269,6 +252,27 @@ MonoBehaviour:
   gridRange: 10
   nodeRadius: 0.5
   distanceBuffer: 0.5
+--- !u!114 &752259225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 752259218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9a41d49eb8bb143a60d4403e43b4bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterDB: {fileID: 11400000, guid: 8a7b046e593882641be6fef5d3e04c28, type: 2}
+  isAttackMonster: []
+  monsterAnimator: {fileID: 1452079696}
+  spriteRenderer_img: {fileID: 1452079697}
+  circleCollider2D: {fileID: 1957470941}
+  nextState: 0
+  laser: {fileID: 8003108530253235944, guid: d3c2dc6fc15e1e24681671a46fe4a549, type: 3}
+  missile: {fileID: 5590469790995179594, guid: 956b9af25ea322c4fa68a89639a00859, type: 3}
+  bulletParent: {fileID: 1087201117}
 --- !u!1 &837492437
 GameObject:
   m_ObjectHideFlags: 0
@@ -2108,6 +2112,37 @@ Transform:
   - {fileID: 51447843}
   m_Father: {fileID: 752259219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1087201116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1087201117}
+  m_Layer: 0
+  m_Name: BulletParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1087201117
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1087201116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 752259219}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1133325839
 GameObject:
   m_ObjectHideFlags: 0
@@ -3338,7 +3373,7 @@ Transform:
   m_GameObject: {fileID: 2033634942}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 6.74, y: -0.11, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

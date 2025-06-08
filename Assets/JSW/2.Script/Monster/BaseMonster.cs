@@ -26,13 +26,13 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
 
     [SerializeField] protected CircleCollider2D circleCollider2D = null;
 
-    protected AstarPathfinder aPath= null;
-    public AstarPathfinder APath {get{return aPath; }}
+    protected AstarPathfinder aPath = null;
+    public AstarPathfinder APath { get { return aPath; } }
     private Vector3 xpos = Vector3.zero;
 
     public EMonsterState nextState;
     private float hp = 100.0f;
- 
+
     //몬스터 생명
     public float Hp
     {
@@ -49,8 +49,8 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
 
     private void Awake()
     {
-        aPath= GetComponent<AstarPathfinder>();
-       // Debug.Log(aPath);
+        aPath = GetComponent<AstarPathfinder>();
+        // Debug.Log(aPath);
         IStateStartSetting();
     }
 
@@ -111,6 +111,19 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
 
     }
 
+    public override EMonsterState GetCurrentStateEnum()
+    {
+        foreach (var pair in dicState)
+        {
+            if (pair.Value == machine.CurState)
+                return pair.Key;
+        }
+        return default;
+    }
+    public bool IsDead(){
+        return GetCurrentStateEnum() == EMonsterState.Dead? true: false;
+    }
+
     //타워주변에 있는 몬스터를 감지하여 해당 몬스터를 List에 추가
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -153,21 +166,22 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
 
     public IEnumerator CorutineVir(bool isStop)
     {
-        while (isStop&&isAttackMonster.Count>0)
+        while (isStop && isAttackMonster.Count > 0)
         {
             float dirX = isAttackMonster[0].transform.position.x - transform.position.x;
 
             if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
             {
                 spriteRenderer_img.flipX = dirX < 0;  // 왼쪽이면 true, 오른쪽이면 false
-                FlipXposChange(dirX>0);
+                FlipXposChange(dirX > 0);
             }
             yield return new WaitForSeconds(0.1f);
         }
     }
-    
+
     //피해를 입었을 경우 hp감소
-    public void DamagedHp(int num){
+    public void DamagedHp(int num)
+    {
         Hp -= num;
     }
     //colider를 사용해서 몬스터 감지

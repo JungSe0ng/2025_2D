@@ -7,6 +7,7 @@ public abstract class StatePattern<T, K> : MonoBehaviour
     protected Dictionary<T, IState<K>> dicState = new Dictionary<T, IState<K>>();
     protected StateMachine<K> machine = null;
 
+
     //State패턴 초기 설정
     protected abstract void IStateStartSetting();
 
@@ -18,4 +19,7 @@ public abstract class StatePattern<T, K> : MonoBehaviour
 
     //stateUpdate함
     protected abstract void UpdateSetting();
+
+   public abstract T GetCurrentStateEnum();
+    
 }

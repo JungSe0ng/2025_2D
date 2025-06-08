@@ -5,17 +5,19 @@ using System.Collections;
 public class BossMonster : NormalMonster
 {
     //레이저
-    private GameObject laser = null;
+    [SerializeField]private GameObject laser = null;
     public GameObject Laser { get { return laser; } } 
 
     //미사일
-    private GameObject missile = null;
+    [SerializeField]private GameObject missile = null;
     public GameObject Missile { get { return missile; } }
 
     //총알 부모 위치
-    private Transform bulletParent = null;
+    [SerializeField]private Transform bulletParent = null;
     public Transform BulletParent { get { return bulletParent; } }
-
+    
+    private BossMonsterCoolTime coolTime = null;
+    public BossMonsterCoolTime CoolTime { get { return coolTime; } }
     protected override void IStateStartSetting()
     {
         base.IStateStartSetting();
@@ -23,7 +25,7 @@ public class BossMonster : NormalMonster
         IState<BaseMonster> walk = new BossMonsterWalk(this);
         IState<BaseMonster> brustShoot = new BossMonsterBrustShoot(this);
         IState<BaseMonster> jumpFly = new BossMonsterJumpFly(this);
-        IState<BaseMonster> coolTime = new BossMonsterCoolTime(this);
+        coolTime = new BossMonsterCoolTime(this);
         IState<BaseMonster> dead = new BossMonsterDead(this);
 
         dicState.Add(EMonsterState.Idle, idle);
