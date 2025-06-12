@@ -83,7 +83,7 @@ namespace NormalMonsterState
         protected BaseMonster baseMonster = null;
         protected Vector3 targetPos;
         public float traceNums = 5f;               // 최대 정찰 거리
-        public float waitTime = 0.5f;              // 도착 후 대기 시간
+        public float waitTime = 0.1f;              // 도착 후 대기 시간
         private bool movingRight = true;
         public float distanceThreshold = 0.6f;
         private IEnumerator traceCorutine = null;
@@ -96,8 +96,10 @@ namespace NormalMonsterState
 
         public virtual void OperateEnter()
         {
+            baseMonster.APath.GenerateGrid();
             baseMonster.StartCoroutine(traceCorutine);
             baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
+            Debug.Log("정찰모드가 실행됩니다.");
         }
 
         public virtual void OperateExit()
@@ -109,7 +111,7 @@ namespace NormalMonsterState
         public virtual void OperateUpdate()
         {
             targetPos = new Vector3(destination.x, destination.y, 0f);
-            baseMonster.APath.FindPathTarget(ref targetPos);
+            baseMonster.APath.FollowPath();
         }
         private IEnumerator PatrolLoop()
         {
@@ -119,22 +121,23 @@ namespace NormalMonsterState
                 Vector2 dir = movingRight ? Vector2.right : Vector2.left;
 
                 // 2. Raycast로 벽까지의 거리 측정
-                RaycastHit2D hit = Physics2D.Raycast(baseMonster.transform.position, dir, traceNums, 1<<10);
-                float moveDistance = hit.collider != null ? hit.distance-0.5f : traceNums;
+                RaycastHit2D hit = Physics2D.Raycast(baseMonster.transform.position, dir, traceNums, 1 << 10);
+                float moveDistance = hit.collider != null ? hit.distance - 0.5f : traceNums;
                 // 3. 목적지 설정
                 destination = (Vector2)baseMonster.transform.position + dir * moveDistance;
+                baseMonster.APath.FindPath(new Vector3(destination.x, destination.y, 0f));
 
                 //목적지로 이동
                 // 5. 목적지 도달까지 대기
-                while (Vector3.Distance(baseMonster.transform.position, destination) > distanceThreshold)
-                {        
+                while (Vector3.Distance(baseMonster.transform.position, destination) > distanceThreshold && baseMonster.APath.Path.Count > 0)
+                {
+                    //Debug.Log(Vector3.Distance(baseMonster.transform.position, destination));
                     yield return null;
                 }
                 //Debug.Log(baseMonster.APath.targetDis+" " +destination+"목적지 입니다.");
 
                 // 6. 방향 반전
                 movingRight = !movingRight;
-
                 // 7. Sprite Flip 처리 (선택)
                 if (baseMonster.SpriteRender_img.TryGetComponent(out SpriteRenderer sr))
                 {
@@ -162,6 +165,7 @@ namespace NormalMonsterState
         public virtual void OperateEnter()
         {
             //타겟 지점으로 이동
+
             isStop = true;
             baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
 
@@ -197,9 +201,20 @@ namespace NormalMonsterState
 
         public virtual void OperateEnter()
         {
-            Debug.Log("죽었습니다.");
-            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsDead.ToString(), true);
+            baseMonster.StartCoroutine(CoutineDead());
             //
+        }
+        protected IEnumerator CoutineDead()
+        {
+            Debug.Log("쥭어용");
+            baseMonster.MonsterAnimator.SetBool("IsDead", true);
+            //d애니메이션이 종료되면 다음단계로 넘어간다.
+            yield return new WaitUntil(() =>
+              baseMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f);
+            Debug.Log("멈춤");
+            baseMonster.MonsterAnimator.speed = 0;
+            yield return new WaitForSeconds(0.2f);
+            baseMonster.gameObject.SetActive(false);
         }
         public virtual void OperateExit()
         {

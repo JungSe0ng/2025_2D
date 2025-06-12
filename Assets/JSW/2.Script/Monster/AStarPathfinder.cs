@@ -13,6 +13,8 @@ public class AstarPathfinder : MonoBehaviour
 
     private AStarNode[,] grid;
     private List<AStarNode> path = new List<AStarNode>();
+
+    public List<AStarNode> Path { get { return path; } }
     private Vector2 bottomLeft;
     private float nodeDiameter;
     private Vector2 lastGridCenter; // 마지막으로 그리드를 생성한 중심 좌표
@@ -48,6 +50,7 @@ public class AstarPathfinder : MonoBehaviour
         }
         FollowPath();
     }
+   
 
     //만약 현재 위치 좌표에서 이동을 원하는 값이랑 같은 경우.. 위치를 변경하지 않는다.
     private void CheckSidePos(int correction, ref Vector3 targetPos)
@@ -80,7 +83,7 @@ public class AstarPathfinder : MonoBehaviour
         //Debug.Log(targetPos);
     }
 
-    private void GenerateGrid()
+    public void GenerateGrid()
     {
         nodeDiameter = nodeRadius * 2f;
 
@@ -138,7 +141,7 @@ public class AstarPathfinder : MonoBehaviour
     }
 
 
-    private void FindPath(Vector3 target)
+    public void FindPath(Vector3 target)
     {
         path.Clear();
 
@@ -220,14 +223,15 @@ public class AstarPathfinder : MonoBehaviour
         path.Reverse();
     }
 
-    private void FollowPath()
+    public void FollowPath()
     {
+      //  Debug.Log(path.Count);
         if (path.Count == 0) return;
 
         Vector2 targetPos = path[0].worldPos;
-        Debug.Log(targetPos + "위치로 이동중");
+        //Debug.Log("이동 목표는"+targetPos);
         transform.position = Vector2.MoveTowards(transform.position, targetPos, Time.deltaTime * baseMonster.MonsterDB.MoveSpeed);
-//
+
         //해당 grid에 도착하면 멈춤
         if (Vector2.Distance(transform.position, targetPos) < 0.1f)
         {

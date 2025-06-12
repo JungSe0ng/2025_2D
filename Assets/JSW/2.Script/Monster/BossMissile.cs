@@ -34,17 +34,25 @@ public class BossMissile : MonoBehaviour, IBullet
             return;
         }
 
+        Vector3 moveDir;
         if (isTracking && target != null)
         {
             Vector2 direction = (Vector2)target.position - (Vector2)transform.position;
             direction.Normalize();
             float rotateAmount = Vector3.Cross(direction, transform.right).z;
             transform.Rotate(0, 0, -rotateAmount * rotateSpeed * Time.deltaTime);
-            transform.Translate(Vector3.right * speed * Time.deltaTime);
+            moveDir = transform.right;
+            transform.Translate(moveDir * speed * Time.deltaTime, Space.World);
         }
         else
         {
-            transform.Translate(shootDirection * speed * Time.deltaTime);
+            moveDir = shootDirection;
+            if (moveDir != Vector3.zero)
+            {
+                float angle = Mathf.Atan2(moveDir.y, moveDir.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+            transform.Translate(moveDir * speed * Time.deltaTime, Space.World);
         }
     }
 

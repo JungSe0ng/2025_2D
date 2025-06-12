@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78d72e91ad488e44a80cf4a3d2f3da65, type: 3}
-  m_Name: BoassMonster
+  m_Name: SubMonster
   m_EditorClassIdentifier: 
-  monsterCodeName: 1
-  monsterName: BossMonster
+  monsterCodeName: 4
+  monsterName: SubMonster
   monsterHp: 100
   damage: 10
   moveSpeed: 1
-  isAttackArea: 1
-  isTraceArea: 30
-  coolTime: 3
-  xFlipPos: 0.35
+  isAttackArea: 3
+  isTraceArea: 4
+  coolTime: 0.1
+  xFlipPos: 0.15
   stopDistance: 2

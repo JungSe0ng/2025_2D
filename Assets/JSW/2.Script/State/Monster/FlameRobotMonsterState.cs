@@ -6,6 +6,8 @@ namespace FlameRobotMonsterState
     public class FlameRobotMonsterStateIdle : NormalMonsterState.NormalMonsterIdle
     {
         public FlameRobotMonsterStateIdle(BaseMonster baseMonster) : base(baseMonster) { }
+
+       
     }
 
     public class FlameRobotMonsterStateWalk : NormalMonsterState.NormalMonsterWalk
@@ -62,11 +64,13 @@ namespace FlameRobotMonsterState
                 targetPos = baseMonster.IsAttackMonster[0].transform.position;
                 baseMonster.APath.FindPathTarget(ref targetPos, baseMonster.transform.position.x - targetPos.x < 0 ? -1 : 1);
             }
+           
 
         }
         private IEnumerator NextIdleTime()
         {
-            yield return new WaitForSeconds(3.0f);
+            Debug.Log(111111);
+            yield return new WaitForSeconds(1.0f);
             //다음 쿨타임 state로 전환한다. 쿨타임에서 변경이 안되도록 설정해준다.
             flame.isChangeState = false;
             baseMonster.StatePatttern(EMonsterState.Idle);

@@ -28,6 +28,7 @@ namespace BossMonsterState
         protected int instanceMax = 5;
         protected int cnt = 0;
         protected IBullet laser = null;
+        protected bool isStop = true;
         // 5방향 기본 벡터 캐싱
         private static readonly Vector3[] baseDirections = new Vector3[] {
             new Vector3(0, 1, 0),
@@ -48,16 +49,23 @@ namespace BossMonsterState
             //연속 방문이 아닌경우 cooltime으로 보내버린다.
             Debug.Log("보스가 레이저 모드를 시작합니다.");
             //플레이어 방향을 기준으로 5개의 레이저를 발사한다. 맨처음 생성자 부분에서 레이저를 생산한다.
-            ShootLaser();
             //발사 이후 다음 단계를 위한 코루틴 단계를 실행한다.
             bossMonster.StartCoroutine(FinishShootLaser());
+
+            //자동 방향 전환
+            isStop = true;
+            bossMonster.VirFipXposChange(bossMonster.IsAttackMonster[0].transform.position);
         }
+
         private IEnumerator FinishShootLaser()
         {
+            bossMonster.MonsterAnimator.SetFloat("IsAttack", 1);
             while (bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1.0f && !bossMonster.IsDead())
             {
                 yield return new WaitForSeconds(0.01f);
             }
+            ShootLaser();
+
             Debug.Log("shootanimation종료");
             if (!bossMonster.IsDead())
                 cnt++;
@@ -82,7 +90,7 @@ namespace BossMonsterState
         //계산 기준은 본인 (0,1) (1,1) (1,0) , (1,-1), (0,-1) 이렇게 5군데를 계산한다.
         private void ShootLaser()
         {
-            bossMonster.MonsterAnimator.SetFloat("IsAttack", 1);
+            //레이저를 발사한다.
             if (bossMonster.IsAttackMonster.Count == 0) return;
             Vector3 playerPos = bossMonster.IsAttackMonster[0].transform.position;
             Vector3 bossPos = bossMonster.transform.position;
@@ -114,7 +122,7 @@ namespace BossMonsterState
                 return Object.Instantiate(bossMonster.Laser, bossMonster.transform.position, Quaternion.identity).GetComponent<IBullet>();
             }
             IBullet laser = laserArr.Dequeue();
-            laser.OutBullet(bossMonster.BulletParent, Vector3.zero, Quaternion.identity);
+            laser.OutBullet(bossMonster.BulletParent, bossMonster.transform.position, Quaternion.identity);
             return laser;
         }
 
@@ -129,10 +137,12 @@ namespace BossMonsterState
             //애니메이션 종료
             bossMonster.MonsterAnimator.SetFloat("IsAttack", 0);
             Debug.Log("보스가 레이저 모드를 종료합니다.");
+            isStop = false;
         }
-        public virtual void OperateUpdate() {
+        public virtual void OperateUpdate()
+        {
             Debug.Log(bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime);
-         }
+        }
     }
 
     // JumpFly
@@ -148,6 +158,7 @@ namespace BossMonsterState
             //점프 애니메이션을 실행하고 점프애니메이션이 끝나면 바로 FlyAnimation을 실행한다. 목표 지점 가운데에 도달하면 FlyAnimation을 종료한다.
             bossMonster.StartCoroutine(FinishJump());
             Debug.Log("보스가 점프 모드를 시작합니다.");
+            bossMonster.VirFipXposChange(mainPos);
         }
 
         private IEnumerator FinishJump() //JumpAnimation이 끝나면 바로 FlyAnimation을 실행한다.
@@ -163,7 +174,7 @@ namespace BossMonsterState
             //목표지점
             while (Vector3.Distance(bossMonster.transform.position, mainPos) > 0.1f && !bossMonster.IsDead())
             {
-                Debug.Log((Vector3.Distance(bossMonster.transform.position, mainPos)+"거리가 남았습니다."));
+                Debug.Log((Vector3.Distance(bossMonster.transform.position, mainPos) + "거리가 남았습니다."));
                 //목표물 지점으로 날아감.
                 bossMonster.transform.position = Vector3.MoveTowards(
                     bossMonster.transform.position,
@@ -205,6 +216,9 @@ namespace BossMonsterState
     {
         protected BaseMonster bossMonster;
         protected Vector3 targetPos;
+        protected bool isStop = true;
+        private float time = 0.0f;
+        private IEnumerator coroutine = null;
         public BossMonsterWalk(BaseMonster bossMonster) { this.bossMonster = bossMonster; }
         public virtual void OperateEnter()
         {
@@ -212,11 +226,17 @@ namespace BossMonsterState
             bossMonster.MonsterAnimator.SetBool("IsWalk", true);
             //플레이어한테 이동할건데 시간이 지나면 가속도 붙어서 빨리 이동이됨 그리고 애니메이션 속도도 증가
             targetPos = bossMonster.IsAttackMonster[0].transform.position;
+            isStop = true;
+            bossMonster.APath.FindPath(targetPos);
+            coroutine = bossMonster.OriginCorutineVir(isStop);
+            bossMonster.StartCoroutine(coroutine);
         }
         public virtual void OperateExit()
         {
             bossMonster.MonsterAnimator.SetBool("IsWalk", false);
             Debug.Log("보스가 플레이한테 이동하는 추적모드를 종료합니다.");
+            isStop = false;
+            bossMonster.StopCoroutine(coroutine);   
         }
         public virtual void OperateUpdate()
         {
@@ -227,8 +247,13 @@ namespace BossMonsterState
                 Debug.LogError("보스가 플레이어를 찾을 수 없습니다.");
                 return;
             }
+            if (time > 6.0f)
+            {
+                time = 0.0f;
+                bossMonster.StatePatttern(EMonsterState.Idle);
+            }
             //플레이어한테 움직인다.
-            bossMonster.transform.position = Vector3.MoveTowards(bossMonster.transform.position, targetPos, 1.0f * Time.deltaTime);
+            //bossMonster.transform.position = Vector3.MoveTowards(bossMonster.transform.position, targetPos, 1.0f * Time.deltaTime);
             //거리조절절
             if (Vector3.Distance(bossMonster.transform.position, targetPos) < bossMonster.MonsterDB.StopDistance)
             {
@@ -276,6 +301,9 @@ namespace BossMonsterState
 
         private IBullet missile = null;
 
+        private IEnumerator coroutine = null;
+        protected bool isStop = true;
+
         public BossMonsterMissile(BaseMonster bossMonster)
         {
             this.bossMonster = bossMonster.GetComponent<BossMonster>();
@@ -287,45 +315,63 @@ namespace BossMonsterState
         {
             //시작을 하면 연속으로 5번을 발사하게 한다. 쿨타임 0.1초를 기준으로 발사한다. 총알은 유도탄이 되어 있다.
             Debug.Log("보스가 미사일 모드를 시작합니다.");
-            //ShootMissile();
-            bossMonster.MonsterAnimator.SetFloat("IsAttack", 2);
+
+
+            isStop = true;
+            coroutine = bossMonster.CorutineVir(isStop);
+            bossMonster.StartCoroutine(coroutine);
             bossMonster.StartCoroutine(CorutineMissile());
         }
         private IEnumerator CorutineMissile()
         {
-            //애니메이션을 실행한다.    
-            yield return new WaitForSeconds(0.8f);
-            //0.1초를 간격으로 미사일을 발사한다.
-            for (int i = 0; i < 5; i++)
+            //미사일 시작 애니메이션 시작한다.
+            bossMonster.MonsterAnimator.SetFloat("IsAttack", 2);
+            while (bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime > 1.0f && !bossMonster.IsDead())
             {
-                ShootMissile();
-                yield return new WaitForSeconds(0.8f);
+                yield return new WaitForSeconds(0.01f);
             }
+
+            //애니메이션 종료 후 미사일 loop실행 총 5발을 발사할건데 발사 애니메이션 종류 후 미사일 발사 실행
+            while (cnt < 5)
+            {
+                bossMonster.MonsterAnimator.SetFloat("IsAttack", 3);
+                yield return new WaitUntil(() =>
+                bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).IsName("Attack")); // 애니메이션이 될 때까지 대기
+                yield return new WaitUntil(() =>
+                bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f);
+
+                ShootMissile();
+                bossMonster.MonsterAnimator.SetFloat("IsAttack", 0);
+                yield return new WaitUntil(() =>
+                bossMonster.MonsterAnimator.GetCurrentAnimatorStateInfo(0).IsName("BoseIdle")); // 애니메이션 이름으로 수정
+                cnt++;
+            }
+            cnt = 0;
             //다음 루트로 이동을 지시한다.
             bossMonster.nextState = EMonsterState.Walk;
             bossMonster.StatePatttern(EMonsterState.CoolTime);
         }
         private void ShootMissile() //미사일 하나 꺼내서 미사일을 다음 좌표로 쏘라고 명령한다.
         {
-            OutMissile(0).Shoot(bossMonster.IsAttackMonster[0].transform.position);
+            OutMissile().Shoot(bossMonster.IsAttackMonster[0].transform.position);
         }
         private void InstanceMissile() //레이저 생성
         {
             for (int i = 0; i < instanceMax; i++)
             {
-                missile = Object.Instantiate(bossMonster.Laser, bossMonster.transform.position, Quaternion.identity).GetComponent<IBullet>();
+                missile = Object.Instantiate(bossMonster.Missile, bossMonster.transform.position, Quaternion.identity).GetComponent<IBullet>();
                 InMissile(missile);
             }
         }
         //레이저를 꺼낼 수는 방식을 
-        private IBullet OutMissile(int num)
+        private IBullet OutMissile()
         {
             if (missileArr.Count <= 0)
             {
-                return Object.Instantiate(bossMonster.Laser, bossMonster.transform.position, Quaternion.identity).GetComponent<IBullet>();
+                return Object.Instantiate(bossMonster.Missile, bossMonster.transform.position, Quaternion.identity).GetComponent<IBullet>();
             }
             missile = missileArr.Dequeue();
-            missile.OutBullet(bossMonster.BulletParent, Vector3.zero, Quaternion.identity);
+            missile.OutBullet(bossMonster.BulletParent, bossMonster.transform.position, Quaternion.identity);
             return missile;
         }
 
@@ -339,7 +385,9 @@ namespace BossMonsterState
         {
             //애니메이션 종료
             bossMonster.MonsterAnimator.SetFloat("IsAttack", 0);
+            bossMonster.StopCoroutine(coroutine);
             Debug.Log("보스가 미사일 모드를 종료합니다.");
+            isStop = false;
         }
         public virtual void OperateUpdate() { }
     }

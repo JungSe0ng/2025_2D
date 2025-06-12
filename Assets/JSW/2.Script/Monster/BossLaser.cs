@@ -10,8 +10,11 @@ public class BossLaser : MonoBehaviour, IBullet
     private float timer = 0f;
     private Vector3 shootDirection = Vector3.right;
 
+    private Vector3 targetPos = Vector3.zero;
     public void Shoot(Vector3 direction)
     {
+        targetPos = direction;
+        Debug.Log(direction+"방향으로 날아간다.");
         shootDirection = direction.normalized;
     }
 
@@ -22,7 +25,13 @@ public class BossLaser : MonoBehaviour, IBullet
 
     void Update()
     {
-        transform.Translate(shootDirection * speed * Time.deltaTime);
+        // 방향을 바라보게 회전
+        if (shootDirection != Vector3.zero)
+        {
+            float angle = Mathf.Atan2(shootDirection.y, shootDirection.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+        transform.Translate(shootDirection * speed * Time.deltaTime, Space.World);
         timer += Time.deltaTime;
         if (timer >= lifeTime)
         {

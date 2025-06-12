@@ -43,9 +43,10 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
         {
             hp = value;
             //체력이 0미만으로 내려가면 죽은 상태로 변경
-            if (hp < 0.0f) StatePatttern(EMonsterState.Dead);
+            if (hp <= 0.0f) StatePatttern(EMonsterState.Dead);
         }
     }
+
 
     private void Awake()
     {
@@ -120,8 +121,9 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
         }
         return default;
     }
-    public bool IsDead(){
-        return GetCurrentStateEnum() == EMonsterState.Dead? true: false;
+    public bool IsDead()
+    {
+        return GetCurrentStateEnum() == EMonsterState.Dead ? true : false;
     }
 
     //타워주변에 있는 몬스터를 감지하여 해당 몬스터를 List에 추가
@@ -163,12 +165,40 @@ public class BaseMonster : StatePattern<EMonsterState, BaseMonster>, IProduct
         xpos.x = isRight ? monsterDB.XFlipPos : monsterDB.XFlipPos * -1;
         spriteRenderer_img.gameObject.transform.localPosition = xpos;
     }
+    public void VirFipXposChange(Vector3 v3)
+    {
+        float dirX = v3.x - transform.position.x;
+
+        if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
+        {
+            spriteRenderer_img.flipX = dirX < 0;  // 왼쪽이면 true, 오른쪽이면 false
+            FlipXposChange(dirX > 0);
+        }
+    }
 
     public IEnumerator CorutineVir(bool isStop)
     {
-        while (isStop && isAttackMonster.Count > 0)
+        while (isStop && isAttackMonster.Count > 0 && !IsDead())
         {
             float dirX = isAttackMonster[0].transform.position.x - transform.position.x;
+
+            if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
+            {
+                spriteRenderer_img.flipX = dirX < 0;  // 왼쪽이면 true, 오른쪽이면 false
+                FlipXposChange(dirX > 0);
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+    public IEnumerator OriginCorutineVir(bool isStop)
+
+    {
+        Vector3 targetPos = isAttackMonster[0].transform.position;
+
+        while (isStop && isAttackMonster.Count > 0 && !IsDead())
+        {
+
+            float dirX = targetPos.x - transform.position.x;
 
             if (Mathf.Abs(dirX) > 0.01f) // 거의 같은 위치면 무시
             {

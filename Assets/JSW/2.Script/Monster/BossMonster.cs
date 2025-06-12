@@ -5,17 +5,17 @@ using System.Collections;
 public class BossMonster : NormalMonster
 {
     //레이저
-    [SerializeField]private GameObject laser = null;
-    public GameObject Laser { get { return laser; } } 
+    [SerializeField] private GameObject laser = null;
+    public GameObject Laser { get { return laser; } }
 
     //미사일
-    [SerializeField]private GameObject missile = null;
+    [SerializeField] private GameObject missile = null;
     public GameObject Missile { get { return missile; } }
 
     //총알 부모 위치
-    [SerializeField]private Transform bulletParent = null;
+    [SerializeField] private Transform bulletParent = null;
     public Transform BulletParent { get { return bulletParent; } }
-    
+
     private BossMonsterCoolTime coolTime = null;
     public BossMonsterCoolTime CoolTime { get { return coolTime; } }
     protected override void IStateStartSetting()
@@ -39,11 +39,14 @@ public class BossMonster : NormalMonster
 
         machine = new StateMachine<BaseMonster>(this, dicState[EMonsterState.Idle]);
     }
-
+    void Start()
+    {
+        GetComponent<BossMonsterSpawner>().StartSpawning();
+    }
     protected override IEnumerator CorutinePattern()
     {
-            StatePatttern(EMonsterState.Idle);
-            yield return new WaitForSeconds(1f);
-            StatePatttern(EMonsterState.Walk);
+        StatePatttern(EMonsterState.Idle);
+        yield return new WaitForSeconds(1f);
+        StatePatttern(EMonsterState.Walk);
     }
-} 
+}

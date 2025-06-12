@@ -33,7 +33,7 @@ namespace BoomRobotMonsterState
             baseMonster.StartCoroutine(baseMonster.CorutineVir(isStop));
 
             //override를 진행해서 아래에서 재정의해서 사용이 필요함 공격 애니메이션 타이밍이 다름
-            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsWalk.ToString(), true);
+            baseMonster.MonsterAnimator.SetBool(NormalMonsterAnim.IsAttack.ToString(), true);
             //countdown시작해서 boom
             isBoom = false;
             baseMonster.StartCoroutine(CorutineBoom());
@@ -60,8 +60,14 @@ namespace BoomRobotMonsterState
             Boom();
         }
         private void Boom(){
-            baseMonster.StatePatttern(EMonsterState.Dead);
             Debug.Log("자폭 모드 작동");
+            
+            //범위내에 플레이어가 있는지 확인 후 플레이어가 있으면 플레이어한테 데미지를 준다.
+            if(baseMonster.IsAttackMonster.Count>0&&Vector3.Distance(baseMonster.transform.position,baseMonster.IsAttackMonster[0].transform.position)<=1.5f){
+              
+              
+            }
+            baseMonster.StatePatttern(EMonsterState.Dead);
         }
     }
 
@@ -74,12 +80,19 @@ namespace BoomRobotMonsterState
     // Dead
     public class BoomRobotMonsterDead : NormalMonsterDead
     {
+        protected IEnumerator CoutineDead(){
+            baseMonster.MonsterAnimator.SetBool("IsDead",true);
+            yield return new WaitForSeconds(1.4f);
+            baseMonster.MonsterAnimator.speed =0;
+            yield return new WaitForSeconds(0.2f);
+            baseMonster.gameObject.SetActive(false);
+        }
         public BoomRobotMonsterDead(BaseMonster baseMonster) : base(baseMonster) {}
 
         public override void OperateEnter() {
-            base.OperateEnter();
+           // base.OperateEnter();
             Debug.Log("자폭했습니다.");
-            baseMonster.StatePatttern(EMonsterState.Idle);
+            baseMonster.StartCoroutine(CoutineDead());
         }
 
         public override void OperateExit() {
